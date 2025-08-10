@@ -1,13 +1,199 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>KendaliKas</title>
-    </head>
-    <body>
-        <p>hello world</p>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navbar Bawah Sederhana</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
 
-        <script>
-            console.log('hello world')
-        </script>
-    </body>
+    main {
+      flex: 1;
+      padding: 20px;
+    }
+
+    section {
+      display: none;
+    }
+
+    section.active {
+      display: block;
+    }
+
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #222;
+      padding: 10px 0;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      justify-content: space-around;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav a {
+      color: #aaa;
+      text-decoration: none;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    nav a.active {
+      color: #00aaff;
+      font-weight: bold;
+    }
+
+    #addData {
+      color: white;
+      background-color: rgb(100, 255, 100);
+      font-size: 50px;
+      border: none;
+      border-radius: 50%;
+      position: fixed;
+      height: 60px;
+      width: 60px;
+      right: 10px;
+      bottom: 10px;
+      margin: 50px;
+      cursor: pointer;
+      z-index: 100;
+    }
+
+    #addData:active {
+      background-color: rgb(100, 200, 100);
+    }
+
+    #menutambahdata {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: none;
+      z-index: 1000;
+      overflow: hidden;
+    }
+
+    #menutambahdata.show {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #menutambahdata > div {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ff4444;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <main>
+    <section id="dashboard" class="active">
+        Dashboard
+    </section>
+    <section id="input">
+        <button id="addData">+</button>
+        <div id="menutambahdata">
+          <div>
+            <button class="close-btn" onclick="closeMenu()">×</button>
+            <h1>Tambah Data</h1>
+            <p>- Nama: </p>
+            <p>- Jenis: </p>
+            <p>- Jumlah: </p>
+            <p>- Tanggal: </p>
+            <p>- Upload Bukti: </p>
+          </div>
+        </div>
+    </section>
+    <section id="profile">
+        profile(soon)
+    </section>
+  </main>
+
+  <nav>
+    <ul>
+      <li><a href="#dashboard" class="active">Dashboard</a></li>
+      <li><a href="#input">Input</a></li>
+      <li><a href="profile">Profile</a></li>
+    </ul>
+  </nav>
+
+  <script>
+    const links = document.querySelectorAll('nav a');
+    const sections = document.querySelectorAll('main section');
+
+    links.forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+
+        // Hapus aktif dari semua link
+        links.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+
+        // Tampilkan section yang sesuai
+        const target = link.getAttribute('href').replace('#', '');
+        sections.forEach(sec => {
+          sec.classList.remove('active');
+          if (sec.id === target) {
+            sec.classList.add('active');
+          }
+        });
+      });
+    });
+
+    // Fix tambah data menu
+    const addDataBtn = document.getElementById('addData');
+    const menuTambahData = document.getElementById('menutambahdata');
+
+    addDataBtn.addEventListener('click', () => {
+      menuTambahData.classList.add('show');
+    });
+
+    function closeMenu() {
+      menuTambahData.classList.remove('show');
+    }
+
+    // Close menu when clicking outside
+    menuTambahData.addEventListener('click', (e) => {
+      if (e.target === menuTambahData) {
+        closeMenu();
+      }
+    });
+  </script>
+
+</body>
 </html>
