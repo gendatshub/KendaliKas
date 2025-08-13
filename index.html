@@ -28,11 +28,15 @@
 
     nav {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #222;
-      padding: 10px 0;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      border-radius: 20px;
+      padding: 12px 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      max-width: 320px;
+      width: 85%;
     }
 
     nav ul {
@@ -41,19 +45,44 @@
       justify-content: space-around;
       margin: 0;
       padding: 0;
+      gap: 15px;
     }
 
     nav a {
-      color: #aaa;
+      color: rgba(255, 255, 255, 0.8);
       text-decoration: none;
       text-align: center;
-      font-size: 14px;
+      font-size: 12px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    nav a:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.15);
     }
 
     nav a.active {
-      color: #00aaff;
+      color: white;
+      background: #00aaff;
       font-weight: bold;
+      box-shadow: 0 2px 6px rgba(0, 170, 255, 0.4);
     }
+
+    nav a::before {
+      content: '';
+      display: block;
+      font-size: 18px;
+    }
+
+    nav a[href="#dashboard"]::before { content: '📊'; }
+    nav a[href="#input"]::before { content: '💰'; }
+    nav a[href="#profile"]::before { content: '👤'; }
 
     #addData {
       color: white;
