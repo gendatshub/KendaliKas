@@ -62,11 +62,20 @@
     }
 
     section {
-      display: none;
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
     }
 
     section.active {
-      display: block;
+      opacity: 1;
+      pointer-events: auto;
+      position: relative;
+      height: auto;
     }
 
 
@@ -532,24 +541,64 @@
       }
     });
 
-    // Navigation functionality
+    // Navigation functionality with manual animation
     const links = document.querySelectorAll('nav a');
     const sections = document.querySelectorAll('main section');
+
+    function fadeOut(element, callback) {
+      element.style.transition = 'opacity 0.5s ease-in-out';
+      element.style.opacity = '0';
+      setTimeout(() => {
+        element.style.pointerEvents = 'none';
+        if (callback) callback();
+      }, 500);
+    }
+
+    function fadeIn(element, callback) {
+      element.style.transition = 'opacity 0.5s ease-in-out';
+      element.style.opacity = '0';
+      element.style.pointerEvents = 'auto';
+      element.classList.add('active');
+      setTimeout(() => {
+        element.style.opacity = '1';
+        if (callback) callback();
+      }, 50);
+    }
 
     links.forEach(link => {
       link.addEventListener('click', e => {
         e.preventDefault();
 
-        links.forEach(l => l.classList.remove('active'));
-        link.classList.add('active');
+        const currentActive = document.querySelector('nav a.active');
+        const targetHref = link.getAttribute('href');
+        const targetId = targetHref.replace('#', '');
+        const targetSection = document.getElementById(targetId);
 
-        const target = link.getAttribute('href').replace('#', '');
-        sections.forEach(sec => {
-          sec.classList.remove('active');
-          if (sec.id === target) {
-            sec.classList.add('active');
+        if (currentActive && currentActive !== link) {
+          // Fade out current section
+          const currentSection = document.querySelector('section.active');
+          if (currentSection) {
+            fadeOut(currentSection, () => {
+              // Switch navigation
+              links.forEach(l => l.classList.remove('active'));
+              link.classList.add('active');
+
+              // Hide all sections
+              sections.forEach(sec => {
+                sec.classList.remove('active');
+                sec.style.opacity = '0';
+                sec.style.pointerEvents = 'none';
+              });
+
+              // Fade in new section
+              fadeIn(targetSection);
+            });
           }
-        });
+        } else if (!currentActive) {
+          // No active section, just activate the target
+          link.classList.add('active');
+          fadeIn(targetSection);
+        }
 
         // Close the navigation menu after clicking a link
         nav.classList.remove('show');
