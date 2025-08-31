@@ -11,7 +11,7 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #4CAF50 0%, #2196F3 100%);
       position: relative;
       overflow-x: hidden;
     }
@@ -24,9 +24,9 @@
       width: 100%;
       height: 100%;
       background:
-        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(76, 175, 80, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(33, 150, 243, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(76, 175, 80, 0.2) 0%, transparent 50%);
       pointer-events: none;
       z-index: -1;
     }
@@ -53,6 +53,13 @@
       padding: 20px;
     }
 
+    h1, h2 {
+      color: #1565C0;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
     section {
       display: none;
     }
@@ -68,7 +75,7 @@
       position: fixed;
       top: 20px;
       left: 20px;
-      background: linear-gradient(135deg, #5a4e9c, #6b5ca5);
+      background: linear-gradient(135deg, #4CAF50, #2196F3);
       color: white;
       border: none;
       border-radius: 8px;
@@ -86,7 +93,7 @@
     }
 
     .menu-toggle:hover {
-      background: linear-gradient(135deg, #6b5ca5, #5a4e9c);
+      background: linear-gradient(135deg, #2196F3, #4CAF50);
       transform: scale(1.05);
     }
 
@@ -104,7 +111,7 @@
       position: fixed;
       top: 70px;
       left: 20px;
-      background: linear-gradient(135deg, #5a4e9c, #6b5ca5);
+      background: linear-gradient(135deg, #4CAF50, #2196F3);
       border-radius: 12px;
       padding: 20px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
@@ -155,9 +162,9 @@
 
     nav a.active {
       color: white;
-      background: #6b5ca5;
+      background: #2196F3;
       font-weight: bold;
-      box-shadow: 0 2px 8px rgba(107, 92, 165, 0.6);
+      box-shadow: 0 2px 8px rgba(33, 150, 243, 0.6);
     }
 
     nav a::before {
@@ -173,7 +180,7 @@
 
     #addData {
       color: white;
-      background-color: #6b5ca5;
+      background-color: #4CAF50;
       font-size: 50px;
       border: none;
       border-radius: 50%;
@@ -185,12 +192,12 @@
       margin: 50px;
       cursor: pointer;
       z-index: 100;
-      box-shadow: 0 4px 10px rgba(107, 92, 165, 0.6);
+      box-shadow: 0 4px 10px rgba(76, 175, 80, 0.6);
       transition: background-color 0.3s ease;
     }
 
     #addData:active {
-      background-color: #5a4e9c;
+      background-color: #388E3C;
     }
 
     #menutambahdata {
@@ -199,7 +206,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(107, 92, 165, 0.9);
+      background-color: rgba(76, 175, 80, 0.9);
       display: none;
       z-index: 1000;
       overflow: hidden;
@@ -214,12 +221,12 @@
     }
 
     #menutambahdata > div {
-      background: #e6e0f8;
+      background: #e8f5e8;
       padding: 20px;
       border-radius: 10px;
       max-width: 400px;
       width: 90%;
-      box-shadow: 0 4px 10px rgba(107, 92, 165, 0.3);
+      box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
       position: relative;
     }
 
@@ -248,8 +255,8 @@
     .transaction-table {
       width: 100%;
       border-collapse: collapse;
-      background-color: #f3f0fa;
-      box-shadow: 0 2px 6px rgba(107, 92, 165, 0.2);
+      background-color: #f1f8e9;
+      box-shadow: 0 2px 6px rgba(76, 175, 80, 0.2);
       border-radius: 8px;
       overflow: hidden;
     }
@@ -262,13 +269,13 @@
     }
 
     .transaction-table th {
-      background-color: #6b5ca5;
+      background-color: #2196F3;
       color: white;
       font-weight: bold;
     }
 
     .transaction-table tr:hover {
-      background-color: #e6e0f8;
+      background-color: #e8f5e8;
     }
 
     .transaction-table tr:last-child td {
@@ -344,7 +351,7 @@
     }
 
     .summary-card.balance .amount {
-      color: #6b5ca5;
+      color: #2196F3;
     }
 
     .action-buttons {
@@ -448,7 +455,7 @@
               <input type="text" id="kategori" name="kategori" placeholder="Contoh: Gaji, Belanja, Transport" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
             </div>
             
-            <button type="submit" style="width: 100%; padding: 10px; background-color: #6b5ca5; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s ease;">Simpan Transaksi</button>
+            <button type="submit" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s ease;">Simpan Transaksi</button>
           </form>
         </div>
       </div>
