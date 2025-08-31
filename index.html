@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KendaliKas</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       margin: 0;
@@ -402,7 +403,7 @@
       <div style="padding: 20px;">
         <h1>Dashboard Keuangan</h1>
 
-        <div class="summary-cards">
+      <div class="summary-cards">
           <div class="summary-card income">
             <h3>Total Pemasukan</h3>
             <div class="amount" id="totalIncome">Rp 0</div>
@@ -415,6 +416,11 @@
             <h3>Saldo Saat Ini</h3>
             <div class="amount" id="currentBalance">Rp 0</div>
           </div>
+        </div>
+
+        <div style="max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+          <canvas id="financePieChart" width="400" height="400"></canvas>
+          <div id="safetyReport" style="text-align: center; margin-top: 15px; font-weight: bold; font-size: 18px;"></div>
         </div>
       </div>
     </section>
@@ -730,6 +736,61 @@
         style: 'currency',
         currency: 'IDR'
       }).format(balance);
+
+      // New code to update pie chart and safety report
+      renderPieChart(totalIncome, totalExpense, balance);
+      updateSafetyReport(balance);
+    }
+
+    // New function to render pie chart
+    function renderPieChart(income, expense, balance) {
+      const ctx = document.getElementById('financePieChart').getContext('2d');
+      if (window.financeChart) {
+        window.financeChart.destroy();
+      }
+      window.financeChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: ['Pemasukan', 'Pengeluaran', 'Saldo'],
+          datasets: [{
+            data: [income, expense, balance > 0 ? balance : 0],
+            backgroundColor: ['#4CAF50', '#f44336', '#2196F3'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  let label = context.label || '';
+                  let value = context.parsed || 0;
+                  return label + ': ' + new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // New function to update safety report
+    function updateSafetyReport(balance) {
+      const report = document.getElementById('safetyReport');
+      if (balance > 0) {
+        report.textContent = 'Keuangan Anda dalam keadaan AMAN.';
+        report.style.color = '#4CAF50';
+      } else if (balance === 0) {
+        report.textContent = 'Keuangan Anda dalam keadaan NETRAL.';
+        report.style.color = '#2196F3';
+      } else {
+        report.textContent = 'Keuangan Anda dalam keadaan TIDAK AMAN.';
+        report.style.color = '#f44336';
+      }
     }
 
     // Delete transaction
