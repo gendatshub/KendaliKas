@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KendaliKas</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       margin: 0;
@@ -12,41 +11,10 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      background: linear-gradient(135deg, #4CAF50 0%, #2196F3 100%);
+      background: #f5f5f5;
+      color: #333;
       position: relative;
       overflow-x: hidden;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background:
-        radial-gradient(circle at 20% 80%, rgba(76, 175, 80, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(33, 150, 243, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(76, 175, 80, 0.2) 0%, transparent 50%);
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    body::after {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image:
-        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
-        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 2px, transparent 2px);
-      background-size: 100px 100px;
-      background-position: 0 0, 50px 50px;
-      opacity: 0.3;
-      pointer-events: none;
-      z-index: -1;
     }
 
     main {
@@ -55,10 +23,9 @@
     }
 
     h1, h2 {
-      color: #1565C0;
-      font-weight: bold;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
+      color: #222;
+      font-weight: 600;
+      margin-bottom: 16px;
     }
 
     section {
@@ -78,165 +45,103 @@
       height: auto;
     }
 
-
-
-    /* Hamburger Menu Button */
-    .menu-toggle {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      background: linear-gradient(135deg, #4CAF50, #2196F3);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 12px;
-      font-size: 18px;
-      cursor: pointer;
-      z-index: 1001;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-      transition: all 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      width: 40px;
-      height: 40px;
-    }
-
-    .menu-toggle:hover {
-      background: linear-gradient(135deg, #2196F3, #4CAF50);
-      transform: scale(1.05);
-    }
-
-    .menu-toggle span {
-      display: block;
-      width: 20px;
-      height: 3px;
-      background: white;
-      border-radius: 2px;
-      transition: all 0.3s ease;
-    }
-
-    /* Navigation Popup */
+    /* Bottom Navigation Bar */
     nav {
       position: fixed;
-      top: 70px;
-      left: 20px;
-      background: linear-gradient(135deg, #4CAF50, #2196F3);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-      max-width: 250px;
-      width: 200px;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-20px);
-      transition: all 0.3s ease;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: white;
+      border-top: 1px solid #ddd;
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
+      box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
       z-index: 1000;
     }
 
-    nav.show {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-    }
-
-    nav ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    nav li {
-      margin-bottom: 10px;
-    }
-
     nav a {
-      color: rgba(255, 255, 255, 0.85);
+      color: #666;
       text-decoration: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      padding: 12px 15px;
-      border-radius: 8px;
-      transition: all 0.3s ease;
       font-size: 14px;
-      text-align: center;
-    }
-
-    nav a:hover {
-      color: white;
-      background: rgba(255, 255, 255, 0.25);
-      transform: translateX(5px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 0;
+      transition: color 0.3s ease;
     }
 
     nav a.active {
-      color: white;
-      background: #2196F3;
-      font-weight: bold;
-      box-shadow: 0 2px 8px rgba(33, 150, 243, 0.6);
+      color: #2196F3;
+      font-weight: 600;
     }
 
-    nav a::before {
-      content: '';
-      display: block;
+    nav a:hover {
+      color: #2196F3;
+    }
+
+    nav a span.icon {
       font-size: 20px;
-      min-width: 20px;
     }
 
-    nav a[href="#dashboard"]::before { content: '📊'; }
-    nav a[href="#input"]::before { content: '💰'; }
-    nav a[href="#profile"]::before { content: '👤'; }
+    /* Hide hamburger menu button */
+    .menu-toggle {
+      display: none;
+    }
 
+    /* Add Data Button */
     #addData {
+      position: fixed;
+      bottom: 56px;
+      right: 16px;
+      background-color: #2196F3;
       color: white;
-      background-color: #4CAF50;
-      font-size: 50px;
       border: none;
       border-radius: 50%;
-      position: fixed;
-      height: 60px;
-      width: 60px;
-      right: 10px;
-      bottom: 10px;
-      margin: 50px;
+      width: 56px;
+      height: 56px;
+      font-size: 32px;
       cursor: pointer;
-      z-index: 100;
-      box-shadow: 0 4px 10px rgba(76, 175, 80, 0.6);
+      box-shadow: 0 4px 10px rgba(33, 150, 243, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
       transition: background-color 0.3s ease;
     }
 
     #addData:active {
-      background-color: #388E3C;
+      background-color: #1769aa;
     }
 
+    /* Modal for adding data */
     #menutambahdata {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(76, 175, 80, 0.9);
+      background-color: rgba(0,0,0,0.4);
       display: none;
-      z-index: 1000;
+      z-index: 1002;
       overflow: hidden;
-      backdrop-filter: blur(5px);
-    }
-
-    #menutambahdata.show {
-      display: flex;
-      flex-direction: column;
+      backdrop-filter: blur(4px);
       align-items: center;
       justify-content: center;
     }
 
+    #menutambahdata.show {
+      display: flex;
+    }
+
     #menutambahdata > div {
-      background: #e8f5e8;
+      background: white;
       padding: 20px;
-      border-radius: 10px;
+      border-radius: 8px;
       max-width: 400px;
       width: 90%;
-      box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       position: relative;
     }
 
@@ -244,7 +149,7 @@
       position: absolute;
       top: 10px;
       right: 10px;
-      background: #a64b4b;
+      background: #d32f2f;
       color: white;
       border: none;
       border-radius: 50%;
@@ -252,11 +157,15 @@
       height: 30px;
       font-size: 18px;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(166, 75, 75, 0.6);
+      box-shadow: 0 2px 6px rgba(211, 47, 47, 0.6);
       transition: background-color 0.3s ease;
     }
 
-    /* Tabel Transaksi Styles */
+    .close-btn:hover {
+      background-color: #9a0007;
+    }
+
+    /* Table Styles */
     .table-container {
       margin-top: 20px;
       overflow-x: auto;
@@ -265,8 +174,8 @@
     .transaction-table {
       width: 100%;
       border-collapse: collapse;
-      background-color: #f1f8e9;
-      box-shadow: 0 2px 6px rgba(76, 175, 80, 0.2);
+      background-color: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
       border-radius: 8px;
       overflow: hidden;
     }
@@ -275,17 +184,17 @@
     .transaction-table td {
       padding: 12px 15px;
       text-align: left;
-      border-bottom: 1px solid #d6cde6;
+      border-bottom: 1px solid #eee;
     }
 
     .transaction-table th {
       background-color: #2196F3;
       color: white;
-      font-weight: bold;
+      font-weight: 600;
     }
 
     .transaction-table tr:hover {
-      background-color: #e8f5e8;
+      background-color: #f1f1f1;
     }
 
     .transaction-table tr:last-child td {
@@ -293,17 +202,17 @@
     }
 
     .income-amount {
-      color: #5cb85c;
-      font-weight: bold;
+      color: #4caf50;
+      font-weight: 600;
     }
 
     .expense-amount {
-      color: #d9534f;
-      font-weight: bold;
+      color: #f44336;
+      font-weight: 600;
     }
 
     .balance-amount {
-      font-weight: bold;
+      font-weight: 600;
     }
 
     .search-container {
@@ -315,7 +224,7 @@
 
     .search-input {
       padding: 10px;
-      border: 1px solid #ddd;
+      border: 1px solid #ccc;
       border-radius: 4px;
       flex: 1;
       max-width: 300px;
@@ -323,41 +232,42 @@
 
     .filter-select {
       padding: 10px;
-      border: 1px solid #ddd;
+      border: 1px solid #ccc;
       border-radius: 4px;
     }
 
     .summary-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
       margin-bottom: 20px;
     }
 
     .summary-card {
       background: white;
-      padding: 20px;
+      padding: 16px;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       text-align: center;
     }
 
     .summary-card h3 {
-      margin: 0 0 10px 0;
-      color: #666;
+      margin: 0 0 8px 0;
+      color: #444;
+      font-weight: 600;
     }
 
     .summary-card .amount {
-      font-size: 24px;
-      font-weight: bold;
+      font-size: 20px;
+      font-weight: 700;
     }
 
     .summary-card.income .amount {
-      color: #5cb85c;
+      color: #4caf50;
     }
 
     .summary-card.expense .amount {
-      color: #d9534f;
+      color: #f44336;
     }
 
     .summary-card.balance .amount {
@@ -366,26 +276,26 @@
 
     .action-buttons {
       display: flex;
-      gap: 5px;
+      gap: 6px;
     }
 
     .edit-btn, .delete-btn {
-      padding: 5px 10px;
+      padding: 6px 12px;
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      font-size: 13px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       transition: background-color 0.3s ease;
     }
 
     .edit-btn {
-      background-color: #d48806;
+      background-color: #f0ad4e;
       color: white;
     }
 
     .edit-btn:hover {
-      background-color: #b37400;
+      background-color: #ec971f;
     }
 
     .delete-btn {
@@ -394,7 +304,7 @@
     }
 
     .delete-btn:hover {
-      background-color: #b52b27;
+      background-color: #c9302c;
     }
   </style>
 </head>
@@ -427,7 +337,7 @@
           </div>
         </div>
 
-        <div style="max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+        <div style="max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);"></div>
           <canvas id="financePieChart" width="400" height="400"></canvas>
           <div id="safetyReport" style="text-align: center; margin-top: 15px; font-weight: bold; font-size: 18px;"></div>
         </div>
@@ -518,11 +428,9 @@
   </main>
 
   <nav>
-    <ul>
-      <li><a href="#dashboard" class="active">Dashboard</a></li>
-      <li><a href="#input">Transaction</a></li>
-      <li><a href="#profile">Profile</a></li>
-    </ul>
+    <a href="#dashboard" class="active">Dashboard</a>
+    <a href="#input">Transaction</a>
+    <a href="#profile">Profile</a>
   </nav>
 
   <script>
