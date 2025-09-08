@@ -465,20 +465,23 @@ import {
 /* -----------------------
    2) FIREBASE CONFIG - GANTI DENGAN MILIKMU
    ----------------------- */
-const firebaseConfig = /* YOUR FIREBASE CONFIG HERE */ {
-  // contoh:
-  // apiKey: "AIza....",
-  // authDomain: "kendalikas.firebaseapp.com",
-  // projectId: "kendalikas",
-  // storageBucket: "kendalikas.appspot.com",
-  // messagingSenderId: "1234567890",
-  // appId: "1:1234567890:web:abcdef123456"
+const firebaseConfig = {
+  apiKey: "AIzaSyB4pQEmt7-8sRG72j7EJ-0BFFbxg0LTd60",
+  authDomain: "kendalikas.firebaseapp.com",
+  projectId: "kendalikas",
+  storageBucket: "kendalikas.firebasestorage.app",
+  messagingSenderId: "759489006429",
+  appId: "1:759489006429:web:18d3461652206bacedb6b4",
+  measurementId: "G-MPHXRZB5KV"
 };
 
 /* -----------------------
    3) INISIALISASI
    ----------------------- */
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js";
+
 const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
