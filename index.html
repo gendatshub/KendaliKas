@@ -555,20 +555,20 @@ links.forEach(link => {
   });
 });
 
-// Modal
-const addDataBtn = document.getElementById('addData');
-const menuTambahData = document.getElementById('menutambahdata');
+  // Modal
+  const addDataBtn = document.getElementById('addData');
+  const menuTambahData = document.getElementById('menutambahdata');
 
-if (addDataBtn) addDataBtn.addEventListener('click', () => { menuTambahData.classList.add('show'); });
-function closeMenu() {
-  menuTambahData.classList.remove('show');
-  document.getElementById('transactionForm').reset();
-  editingId = null;
-  document.getElementById('submitBtn').textContent = 'Simpan Transaksi';
-}
-menuTambahData.addEventListener('click', (e) => {
-  if (e.target === menuTambahData) closeMenu();
-});
+  if (addDataBtn) addDataBtn.addEventListener('click', () => { menuTambahData.classList.add('show'); });
+  window.closeMenu = function() {
+    menuTambahData.classList.remove('show');
+    document.getElementById('transactionForm').reset();
+    editingId = null;
+    document.getElementById('submitBtn').textContent = 'Simpan Transaksi';
+  };
+  menuTambahData.addEventListener('click', (e) => {
+    if (e.target === menuTambahData) window.closeMenu();
+  });
 
 // Format input jumlah with dots for readability (same behavior)
 const jumlahInput = document.getElementById('jumlah');
