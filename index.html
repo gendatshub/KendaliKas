@@ -390,8 +390,13 @@
               <label for="kategori">Kategori:</label><br>
               <input type="text" id="kategori" name="kategori" placeholder="Contoh: Gaji, Belanja, Transport" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
             </div>
-            
-            <button type="submit" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s ease;">Simpan Transaksi</button>
+
+            <div style="margin-bottom: 15px;">
+              <label for="bukti">Bukti Transaksi (opsional):</label><br>
+              <input type="file" id="bukti" name="bukti" accept="image/*" style="margin-top:5px;">
+            </div>
+
+            <button type="submit" id="submitBtn" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s ease;">Simpan Transaksi</button>
           </form>
         </div>
       </div>
@@ -444,326 +449,387 @@
     <a href="#profile">Profile</a>
   </nav>
 
-  <script>
-    // Hamburger menu functionality
-    const menuToggle = document.getElementById('menuToggle');
-    const nav = document.querySelector('nav');
+  <script type="module">
+/* -----------------------
+   1) IMPORT FIREBASE SDK
+   ----------------------- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, onSnapshot, query, orderBy,
+  doc, updateDoc, deleteDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import {
+  getStorage, ref, uploadBytesResumable, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
-    menuToggle.addEventListener('click', () => {
-      nav.classList.toggle('show');
-    });
+/* -----------------------
+   2) FIREBASE CONFIG - GANTI DENGAN MILIKMU
+   ----------------------- */
+const firebaseConfig = /* YOUR FIREBASE CONFIG HERE */ {
+  // contoh:
+  // apiKey: "AIza....",
+  // authDomain: "kendalikas.firebaseapp.com",
+  // projectId: "kendalikas",
+  // storageBucket: "kendalikas.appspot.com",
+  // messagingSenderId: "1234567890",
+  // appId: "1:1234567890:web:abcdef123456"
+};
 
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!menuToggle.contains(e.target) && !nav.contains(e.target)) {
-        nav.classList.remove('show');
-      }
-    });
+/* -----------------------
+   3) INISIALISASI
+   ----------------------- */
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-    // Navigation functionality with manual animation
-    const links = document.querySelectorAll('nav a');
-    const sections = document.querySelectorAll('main section');
+/* -----------------------
+   4) UI / NAV / MODAL (sama seperti sebelumnya)
+   ----------------------- */
+// (copy logic menuToggle, nav links, modal show/close, format input)
+const menuToggle = document.getElementById('menuToggle');
+const nav = document.querySelector('nav');
 
-    function fadeOut(element, callback) {
-      element.style.transition = 'opacity 0.15s ease';
-      element.style.opacity = '0';
-      setTimeout(() => {
-        element.style.pointerEvents = 'none';
-        if (callback) callback();
-      }, 150);
+if (menuToggle) {
+  menuToggle.addEventListener('click', () => {
+    nav.classList.toggle('show');
+  });
+  document.addEventListener('click', (e) => {
+    if (!menuToggle.contains(e.target) && !nav.contains(e.target)) {
+      nav.classList.remove('show');
     }
+  });
+}
 
-    function fadeIn(element, callback) {
-      element.style.transition = 'opacity 0.15s ease';
-      element.style.opacity = '0';
-      element.style.pointerEvents = 'auto';
-      element.classList.add('active');
-      setTimeout(() => {
-        element.style.opacity = '1';
-        if (callback) callback();
-      }, 50);
-    }
+const links = document.querySelectorAll('nav a');
+const sections = document.querySelectorAll('main section');
 
-    links.forEach(link => {
-      link.addEventListener('click', e => {
-        e.preventDefault();
+function fadeOut(element, callback) {
+  element.style.transition = 'opacity 0.15s ease';
+  element.style.opacity = '0';
+  setTimeout(() => {
+    element.style.pointerEvents = 'none';
+    if (callback) callback();
+  }, 150);
+}
 
-        const currentActive = document.querySelector('nav a.active');
-        const targetHref = link.getAttribute('href');
-        const targetId = targetHref.replace('#', '');
-        const targetSection = document.getElementById(targetId);
+function fadeIn(element, callback) {
+  element.style.transition = 'opacity 0.15s ease';
+  element.style.opacity = '0';
+  element.style.pointerEvents = 'auto';
+  element.classList.add('active');
+  setTimeout(() => {
+    element.style.opacity = '1';
+    if (callback) callback();
+  }, 50);
+}
 
-        if (currentActive && currentActive !== link) {
-          // Fade out current section
-          const currentSection = document.querySelector('section.active');
-          if (currentSection) {
-            fadeOut(currentSection, () => {
-              // Switch navigation
-              links.forEach(l => l.classList.remove('active'));
-              link.classList.add('active');
-
-              // Hide all sections
-              sections.forEach(sec => {
-                sec.classList.remove('active');
-                sec.style.opacity = '0';
-                sec.style.pointerEvents = 'none';
-              });
-
-              // Fade in new section
-              fadeIn(targetSection);
-            });
-          }
-        } else if (!currentActive) {
-          // No active section, just activate the target
+links.forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const currentActive = document.querySelector('nav a.active');
+    const targetHref = link.getAttribute('href');
+    const targetId = targetHref.replace('#', '');
+    const targetSection = document.getElementById(targetId);
+    if (currentActive && currentActive !== link) {
+      const currentSection = document.querySelector('section.active');
+      if (currentSection) {
+        fadeOut(currentSection, () => {
+          links.forEach(l => l.classList.remove('active'));
           link.classList.add('active');
+          sections.forEach(sec => {
+            sec.classList.remove('active');
+            sec.style.opacity = '0';
+            sec.style.pointerEvents = 'none';
+          });
           fadeIn(targetSection);
-        }
-
-        // Close the navigation menu after clicking a link
-        nav.classList.remove('show');
-      });
-    });
-
-    // Modal functionality
-    const addDataBtn = document.getElementById('addData');
-    const menuTambahData = document.getElementById('menutambahdata');
-
-    addDataBtn.addEventListener('click', () => {
-      menuTambahData.classList.add('show');
-    });
-
-    function closeMenu() {
-      menuTambahData.classList.remove('show');
-      document.getElementById('transactionForm').reset();
-    }
-
-    menuTambahData.addEventListener('click', (e) => {
-      if (e.target === menuTambahData) {
-        closeMenu();
-      }
-    });
-
-    // Format amount input with dots every 3 digits from the right
-    const jumlahInput = document.getElementById('jumlah');
-    jumlahInput.addEventListener('input', function(e) {
-      let value = e.target.value.replace(/\./g, ''); // Remove existing dots
-      if (value && !isNaN(value)) {
-        // Insert dots every 3 digits from the right
-        let reversed = value.split('').reverse().join('');
-        let withDotsReversed = reversed.match(/.{1,3}/g).join('.');
-        let withDots = withDotsReversed.split('').reverse().join('');
-        e.target.value = withDots;
-      } else if (!value) {
-        e.target.value = '';
-      }
-    });
-
-    // Transaction data storage
-    let transactionData = JSON.parse(localStorage.getItem('transactions')) || [];
-
-    // Form submission handler
-    document.getElementById('transactionForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const rawJumlah = document.getElementById('jumlah').value.replace(/\./g, '');
-      const newTransaction = {
-        id: Date.now(),
-        nama: document.getElementById('nama').value,
-        jenis: document.getElementById('jenis').value,
-        jumlah: parseFloat(rawJumlah),
-        tanggal: document.getElementById('tanggal').value,
-        kategori: document.getElementById('kategori').value || 'Umum'
-      };
-      
-      transactionData.push(newTransaction);
-      saveToLocalStorage();
-      displayTransactions();
-      updateSummary();
-      closeMenu();
-      this.reset();
-    });
-
-    // Display transactions in table format
-    function displayTransactions() {
-      const tbody = document.getElementById('transactionTableBody');
-      
-      if (transactionData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">Belum ada transaksi</td></tr>';
-        return;
-      }
-      
-      let html = '';
-      transactionData.forEach(transaction => {
-        const formattedDate = new Date(transaction.tanggal).toLocaleDateString('id-ID', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
         });
-        
-        const formattedAmount = new Intl.NumberFormat('id-ID', {
-          style: 'currency',
-          currency: 'IDR'
-        }).format(transaction.jumlah);
-        
-        html += `
-          <tr>
-            <td>${formattedDate}</td>
-            <td>${transaction.nama}</td>
-            <td>${transaction.kategori}</td>
-            <td>
-              <span style="color: ${transaction.jenis === 'pemasukan' ? '#4CAF50' : '#f44336'}">
-                ${transaction.jenis === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'}
-              </span>
-            </td>
-            <td class="${transaction.jenis === 'pemasukan' ? 'income-amount' : 'expense-amount'}">
-              ${formattedAmount}
-            </td>
-            <td>
-              <div class="action-buttons">
-                <button class="edit-btn" onclick="editTransaction(${transaction.id})">Edit</button>
-                <button class="delete-btn" onclick="deleteTransaction(${transaction.id})">Hapus</button>
-              </div>
-            </td>
-          </tr>
-        `;
-      });
-      
-      tbody.innerHTML = html;
-    }
-
-    // Filter transactions
-    function filterTransactions() {
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-      const filterType = document.getElementById('filterType').value;
-      
-      const filteredData = transactionData.filter(transaction => {
-        const matchesSearch = transaction.nama.toLowerCase().includes(searchTerm) || 
-                            transaction.kategori.toLowerCase().includes(searchTerm);
-        const matchesType = !filterType || transaction.jenis === filterType;
-        
-        return matchesSearch && matchesType;
-      });
-      
-      displayFilteredTransactions(filteredData);
-    }
-
-    function displayFilteredTransactions(data) {
-      const tbody = document.getElementById('transactionTableBody');
-      
-      if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">Tidak ada transaksi yang sesuai</td></tr>';
-        return;
       }
-      
-      let html = '';
-      data.forEach(transaction => {
-        const formattedDate = new Date(transaction.tanggal).toLocaleDateString('id-ID', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        });
-        
-        const formattedAmount = new Intl.NumberFormat('id-ID', {
-          style: 'currency',
-          currency: 'IDR'
-        }).format(transaction.jumlah);
-        
-        html += `
-          <tr>
-            <td>${formattedDate}</td>
-            <td>${transaction.nama}</td>
-            <td>${transaction.kategori}</td>
-            <td>
-              <span style="color: ${transaction.jenis === 'pemasukan' ? '#4CAF50' : '#f44336'}">
-                ${transaction.jenis === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'}
-              </span>
-            </td>
-            <td class="${transaction.jenis === 'pemasukan' ? 'income-amount' : 'expense-amount'}">
-              ${formattedAmount}
-            </td>
-            <td>
-              <div class="action-buttons">
-                <button class="edit-btn" onclick="editTransaction(${transaction.id})">Edit</button>
-                <button class="delete-btn" onclick="deleteTransaction(${transaction.id})">Hapus</button>
-              </div>
-            </td>
-          </tr>
-        `;
-      });
-      
-      tbody.innerHTML = html;
+    } else if (!currentActive) {
+      link.classList.add('active');
+      fadeIn(targetSection);
     }
+    nav.classList.remove('show');
+  });
+});
 
-    // Update summary
-    function updateSummary() {
-      const totalIncome = transactionData
-        .filter(t => t.jenis === 'pemasukan')
-        .reduce((sum, t) => sum + t.jumlah, 0);
-      
-      const totalExpense = transactionData
-        .filter(t => t.jenis === 'pengeluaran')
-        .reduce((sum, t) => sum + t.jumlah, 0);
-      
-      const balance = totalIncome - totalExpense;
-      
-      document.getElementById('totalIncome').textContent = new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR'
-      }).format(totalIncome);
-      
-      document.getElementById('totalExpense').textContent = new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR'
-      }).format(totalExpense);
-      
-      document.getElementById('currentBalance').textContent = new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR'
-      }).format(balance);
+// Modal
+const addDataBtn = document.getElementById('addData');
+const menuTambahData = document.getElementById('menutambahdata');
+
+if (addDataBtn) addDataBtn.addEventListener('click', () => { menuTambahData.classList.add('show'); });
+function closeMenu() {
+  menuTambahData.classList.remove('show');
+  document.getElementById('transactionForm').reset();
+  editingId = null;
+  document.getElementById('submitBtn').textContent = 'Simpan Transaksi';
+}
+menuTambahData.addEventListener('click', (e) => {
+  if (e.target === menuTambahData) closeMenu();
+});
+
+// Format input jumlah with dots for readability (same behavior)
+const jumlahInput = document.getElementById('jumlah');
+if (jumlahInput) {
+  jumlahInput.addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\./g, '');
+    if (value && !isNaN(value)) {
+      let reversed = value.split('').reverse().join('');
+      let withDotsReversed = reversed.match(/.{1,3}/g).join('.');
+      let withDots = withDotsReversed.split('').reverse().join('');
+      e.target.value = withDots;
+    } else if (!value) {
+      e.target.value = '';
     }
+  });
+}
 
+/* -----------------------
+   5) DATA LAYER (Firestore)
+   ----------------------- */
+let transactionData = []; // diisi dari Firestore
+let editingId = null;     // ketika sedang edit
 
-
-    // Delete transaction
-    function deleteTransaction(id) {
-      if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
-        transactionData = transactionData.filter(t => t.id !== id);
-        saveToLocalStorage();
-        displayTransactions();
-        updateSummary();
-      }
-    }
-
-    // Edit transaction
-    function editTransaction(id) {
-      const transaction = transactionData.find(t => t.id === id);
-      if (transaction) {
-        document.getElementById('nama').value = transaction.nama;
-        document.getElementById('jenis').value = transaction.jenis;
-        document.getElementById('jumlah').value = transaction.jumlah;
-        document.getElementById('tanggal').value = transaction.tanggal;
-        document.getElementById('kategori').value = transaction.kategori;
-        
-        // Remove old transaction
-        transactionData = transactionData.filter(t => t.id !== id);
-        
-        // Show edit form
-        menuTambahData.classList.add('show');
-      }
-    }
-
-    // Save to localStorage
-    function saveToLocalStorage() {
-      localStorage.setItem('transactions', JSON.stringify(transactionData));
-    }
-
-    // Initialize
+// subscribe realtime ke koleksi "transactions"
+function subscribeTransactions() {
+  const q = query(collection(db, 'transactions'), orderBy('createdAt', 'desc'));
+  onSnapshot(q, (snapshot) => {
+    transactionData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    // Pastikan field tanggal tersimpan sebagai 'YYYY-MM-DD' saat input agar mudah parse
     displayTransactions();
     updateSummary();
-    
-    // Set default date to today
-    document.getElementById('tanggal').valueAsDate = new Date();
-  </script>
+  }, (err) => {
+    console.error("Error onSnapshot:", err);
+  });
+}
+subscribeTransactions();
+
+/* -----------------------
+   6) HELPERS
+   ----------------------- */
+function formatCurrency(num) {
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(num || 0);
+}
+function formatInputValue(num) {
+  if (num == null) return '';
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+/* -----------------------
+   7) UPLOAD FILE TO STORAGE
+   ----------------------- */
+async function uploadProofFile(file) {
+  if (!file) return null;
+  const path = `proofs/${Date.now()}_${file.name}`;
+  const storageRef = ref(storage, path);
+  const uploadTask = uploadBytesResumable(storageRef, file);
+  return new Promise((resolve, reject) => {
+    uploadTask.on('state_changed',
+      null,
+      (error) => reject(error),
+      async () => {
+        try {
+          const url = await getDownloadURL(uploadTask.snapshot.ref);
+          resolve(url);
+        } catch (e) {
+          reject(e);
+        }
+      }
+    );
+  });
+}
+
+/* -----------------------
+   8) ADD / UPDATE TRANSACTION
+   ----------------------- */
+document.getElementById('transactionForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const nama = document.getElementById('nama').value.trim();
+  const jenis = document.getElementById('jenis').value;
+  const jumlahRaw = document.getElementById('jumlah').value.replace(/\./g, '');
+  const jumlah = Number(jumlahRaw) || 0;
+  const tanggal = document.getElementById('tanggal').value; // 'YYYY-MM-DD'
+  const kategori = document.getElementById('kategori').value || 'Umum';
+  const file = document.getElementById('bukti')?.files?.[0] ?? null;
+
+  try {
+    // upload file (jika ada)
+    let proofUrl = null;
+    if (file) {
+      proofUrl = await uploadProofFile(file);
+    }
+
+    if (editingId) {
+      // update
+      const refDoc = doc(db, 'transactions', editingId);
+      const payload = {
+        nama, jenis, jumlah, tanggal, kategori,
+        proofUrl: proofUrl || null,
+        updatedAt: serverTimestamp()
+      };
+      await updateDoc(refDoc, payload);
+    } else {
+      // create
+      await addDoc(collection(db, 'transactions'), {
+        nama, jenis, jumlah, tanggal, kategori,
+        proofUrl: proofUrl || null,
+        createdAt: serverTimestamp()
+      });
+    }
+
+    closeMenu();
+  } catch (err) {
+    console.error("Error saving transaction:", err);
+    alert('Gagal menyimpan transaksi. Cek console.');
+  }
+});
+
+/* -----------------------
+   9) DISPLAY / FILTER / SUMMARY
+   ----------------------- */
+function displayTransactions() {
+  const tbody = document.getElementById('transactionTableBody');
+  if (!transactionData || transactionData.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">Belum ada transaksi</td></tr>';
+    return;
+  }
+
+  let html = '';
+  transactionData.forEach(transaction => {
+    const formattedDate = transaction.tanggal
+      ? new Date(transaction.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'2-digit', year:'numeric' })
+      : (transaction.createdAt && transaction.createdAt.toDate)
+        ? transaction.createdAt.toDate().toLocaleDateString('id-ID')
+        : '-';
+    const formattedAmount = formatCurrency(transaction.jumlah);
+
+    html += `
+      <tr>
+        <td>${formattedDate}</td>
+        <td>${transaction.nama}</td>
+        <td>${transaction.kategori}</td>
+        <td>
+          <span style="color: ${transaction.jenis === 'pemasukan' ? '#4CAF50' : '#f44336'}">
+            ${transaction.jenis === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'}
+          </span>
+        </td>
+        <td class="${transaction.jenis === 'pemasukan' ? 'income-amount' : 'expense-amount'}">
+          ${formattedAmount}
+        </td>
+        <td>
+          <div class="action-buttons">
+            <button class="edit-btn" onclick="window.editTransaction('${transaction.id}')">Edit</button>
+            <button class="delete-btn" onclick="window.deleteTransaction('${transaction.id}')">Hapus</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+}
+
+function filterTransactions() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  const filterType = document.getElementById('filterType').value;
+  const filteredData = transactionData.filter(transaction => {
+    const matchesSearch = (transaction.nama || '').toLowerCase().includes(searchTerm) ||
+                          (transaction.kategori || '').toLowerCase().includes(searchTerm);
+    const matchesType = !filterType || transaction.jenis === filterType;
+    return matchesSearch && matchesType;
+  });
+  displayFilteredTransactions(filteredData);
+}
+
+function displayFilteredTransactions(data) {
+  const tbody = document.getElementById('transactionTableBody');
+  if (!data || data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">Tidak ada transaksi yang sesuai</td></tr>';
+    return;
+  }
+  let html = '';
+  data.forEach(transaction => {
+    const formattedDate = transaction.tanggal
+      ? new Date(transaction.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'2-digit', year:'numeric' })
+      : '-';
+    const formattedAmount = formatCurrency(transaction.jumlah);
+    html += `
+      <tr>
+        <td>${formattedDate}</td>
+        <td>${transaction.nama}</td>
+        <td>${transaction.kategori}</td>
+        <td><span style="color: ${transaction.jenis === 'pemasukan' ? '#4CAF50' : '#f44336'}">
+          ${transaction.jenis === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'}
+        </span></td>
+        <td class="${transaction.jenis === 'pemasukan' ? 'income-amount' : 'expense-amount'}">
+          ${formattedAmount}
+        </td>
+        <td>
+          <div class="action-buttons">
+            <button class="edit-btn" onclick="window.editTransaction('${transaction.id}')">Edit</button>
+            <button class="delete-btn" onclick="window.deleteTransaction('${transaction.id}')">Hapus</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
+}
+
+function updateSummary() {
+  const totalIncome = transactionData
+    .filter(t => t.jenis === 'pemasukan')
+    .reduce((sum, t) => sum + (t.jumlah || 0), 0);
+
+  const totalExpense = transactionData
+    .filter(t => t.jenis === 'pengeluaran')
+    .reduce((sum, t) => sum + (t.jumlah || 0), 0);
+
+  const balance = totalIncome - totalExpense;
+
+  document.getElementById('totalIncome').textContent = formatCurrency(totalIncome);
+  document.getElementById('totalExpense').textContent = formatCurrency(totalExpense);
+  document.getElementById('currentBalance').textContent = formatCurrency(balance);
+}
+
+/* -----------------------
+   10) EDIT & DELETE (memanggil Firestore)
+   ----------------------- */
+window.deleteTransaction = async function(id) {
+  if (!confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) return;
+  try {
+    await deleteDoc(doc(db, 'transactions', id));
+  } catch (err) {
+    console.error("Hapus gagal:", err);
+    alert('Gagal menghapus transaksi');
+  }
+};
+
+window.editTransaction = function(id) {
+  const transaction = transactionData.find(t => t.id === id);
+  if (!transaction) return;
+  document.getElementById('nama').value = transaction.nama || '';
+  document.getElementById('jenis').value = transaction.jenis || '';
+  document.getElementById('jumlah').value = formatInputValue(transaction.jumlah || 0);
+  document.getElementById('tanggal').value = transaction.tanggal || '';
+  document.getElementById('kategori').value = transaction.kategori || '';
+  editingId = id;
+  document.getElementById('submitBtn').textContent = 'Perbarui Transaksi';
+  menuTambahData.classList.add('show');
+};
+
+/* -----------------------
+   11) INISIALISASI FORM & DEFAULTS
+   ----------------------- */
+displayTransactions();
+updateSummary();
+document.getElementById('tanggal').valueAsDate = new Date();
+
+// Ubah tombol submit jadi punya id agar bisa diganti label saat edit
+const submitBtn = document.querySelector('#transactionForm button[type="submit"]');
+if (submitBtn) submitBtn.id = 'submitBtn';
+
+</script>
+
 
 </body>
 </html>
