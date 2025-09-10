@@ -422,12 +422,13 @@
                 <th>Kategori</th>
                 <th>Jenis</th>
                 <th>Jumlah</th>
+                <th>Pengupload</th>
                 <th>Aksi</th>
               </tr>
             </thead>
             <tbody id="transactionTableBody">
               <tr>
-                <td colspan="6" style="text-align: center; color: #666;">Belum ada transaksi</td>
+                <td colspan="7" style="text-align: center; color: #666;">Belum ada transaksi</td>
               </tr>
             </tbody>
           </table>
@@ -718,6 +719,7 @@ document.getElementById('transactionForm').addEventListener('submit', async func
         nama, jenis, jumlah, tanggal, kategori,
         proofUrl: proofUrl || null,
         userId: currentUser.uid,
+        uploader: currentUser.email || currentUser.displayName || 'Unknown',
         updatedAt: serverTimestamp()
       };
       await updateDoc(refDoc, payload);
@@ -727,6 +729,7 @@ document.getElementById('transactionForm').addEventListener('submit', async func
         nama, jenis, jumlah, tanggal, kategori,
         proofUrl: proofUrl || null,
         userId: currentUser.uid,
+        uploader: currentUser.email || currentUser.displayName || 'Unknown',
         createdAt: serverTimestamp()
       });
     }
@@ -770,6 +773,7 @@ function displayTransactions() {
         <td class="${transaction.jenis === 'pemasukan' ? 'income-amount' : 'expense-amount'}">
           ${formattedAmount}
         </td>
+        <td>${transaction.uploader || 'Unknown'}</td>
         <td>
           <div class="action-buttons">
             <button class="edit-btn" onclick="window.editTransaction('${transaction.id}')">Edit</button>
@@ -798,7 +802,7 @@ function filterTransactions() {
 function displayFilteredTransactions(data) {
   const tbody = document.getElementById('transactionTableBody');
   if (!data || data.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">Tidak ada transaksi yang sesuai</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666;">Tidak ada transaksi yang sesuai</td></tr>';
     return;
   }
   let html = '';
@@ -818,6 +822,7 @@ function displayFilteredTransactions(data) {
         <td class="${transaction.jenis === 'pemasukan' ? 'income-amount' : 'expense-amount'}">
           ${formattedAmount}
         </td>
+        <td>${transaction.uploader || 'Unknown'}</td>
         <td>
           <div class="action-buttons">
             <button class="edit-btn" onclick="window.editTransaction('${transaction.id}')">Edit</button>

@@ -1,15 +1,14 @@
-# TODO: Implement Per-User Financial Tables
+# TODO: Add Uploader Column to Transaction Table
 
 ## Tasks
-- [x] Update subscribeTransactions() to filter by userId
-- [x] Add userId to new transaction documents when adding
-- [x] Add userId to transaction documents when updating
-- [x] Ensure delete operations are scoped to user's transactions (handled by filtering)
-- [x] Create Firestore composite index for query (userId ==, createdAt desc)
-- [ ] Test with multiple users to verify separation
+- [x] Modify addDoc to include uploader field
+- [x] Modify updateDoc to include uploader field
+- [x] Update table header to include "Pengupload" column
+- [x] Update displayTransactions to show uploader in new column
+- [x] Update displayFilteredTransactions to show uploader in new column
+- [x] Update colspan in empty messages to 7
+- [ ] Test adding and editing transactions to verify uploader display
 
 ## Completed
-- [x] Analyze current code and plan changes
+- [x] Analyze code and plan changes
 - [x] Create TODO.md
-- [x] Fix table not reading data by creating required index
-- [x] Add confirmation alert for logout in profile menu
