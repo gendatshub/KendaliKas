@@ -466,7 +466,7 @@ import {
   getAuth, onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import {
-  getFirestore, collection, addDoc, onSnapshot, query, orderBy,
+  getFirestore, collection, addDoc, onSnapshot, query, orderBy, where,
   doc, updateDoc, deleteDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import {
@@ -496,6 +496,8 @@ const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
+
+let currentUser = null; // to store current user
 
 /* -----------------------
    4) UI / NAV / MODAL (sama seperti sebelumnya)
@@ -604,9 +606,9 @@ if (jumlahInput) {
 let transactionData = []; // diisi dari Firestore
 let editingId = null;     // ketika sedang edit
 
-// subscribe realtime ke koleksi "transactions"
-function subscribeTransactions() {
-  const q = query(collection(db, 'transactions'), orderBy('createdAt', 'desc'));
+// subscribe realtime ke koleksi "transactions" untuk user tertentu
+function subscribeTransactions(userId) {
+  const q = query(collection(db, 'transactions'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
   onSnapshot(q, (snapshot) => {
     transactionData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     // Pastikan field tanggal tersimpan sebagai 'YYYY-MM-DD' saat input agar mudah parse
@@ -616,13 +618,13 @@ function subscribeTransactions() {
     console.error("Error onSnapshot:", err);
   });
 }
-subscribeTransactions();
 
 // Check auth state
 onAuthStateChanged(auth, (user) => {
   const userInfo = document.getElementById('userInfo');
   const loadingProfile = document.getElementById('loadingProfile');
   if (user) {
+    currentUser = user;
     // User logged in, display info
     document.getElementById('userName').textContent = user.displayName || 'Pengguna';
     document.getElementById('userEmail').textContent = user.email;
@@ -633,7 +635,10 @@ onAuthStateChanged(auth, (user) => {
     }
     userInfo.style.display = 'block';
     loadingProfile.style.display = 'none';
+    // Subscribe to user's transactions
+    subscribeTransactions(user.uid);
   } else {
+    currentUser = null;
     // User not logged in, redirect to login
     window.location.href = 'login.html';
   }
@@ -711,6 +716,7 @@ document.getElementById('transactionForm').addEventListener('submit', async func
       const payload = {
         nama, jenis, jumlah, tanggal, kategori,
         proofUrl: proofUrl || null,
+        userId: currentUser.uid,
         updatedAt: serverTimestamp()
       };
       await updateDoc(refDoc, payload);
@@ -719,6 +725,7 @@ document.getElementById('transactionForm').addEventListener('submit', async func
       await addDoc(collection(db, 'transactions'), {
         nama, jenis, jumlah, tanggal, kategori,
         proofUrl: proofUrl || null,
+        userId: currentUser.uid,
         createdAt: serverTimestamp()
       });
     }
