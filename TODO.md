@@ -12,3 +12,4 @@
 - [x] Analyze current code and plan changes
 - [x] Create TODO.md
 - [x] Fix table not reading data by creating required index
+- [x] Add confirmation alert for logout in profile menu

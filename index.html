@@ -646,6 +646,7 @@ onAuthStateChanged(auth, (user) => {
 
 // Logout function
 document.getElementById('logoutBtn').addEventListener('click', async () => {
+  if (!confirm('Apakah Anda yakin ingin logout?')) return;
   try {
     await signOut(auth);
     window.location.href = 'login.html';
