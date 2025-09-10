@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - KendaliKas</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+    }
+
+    .login-container {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .login-container h1 {
+      margin-bottom: 30px;
+      color: #333;
+      font-size: 28px;
+    }
+
+    .google-btn {
+      background: #4285f4;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      transition: background-color 0.3s ease;
+      margin-bottom: 20px;
+    }
+
+    .google-btn:hover {
+      background: #3367d6;
+    }
+
+    .google-btn img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .loading {
+      display: none;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .error {
+      color: #d32f2f;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h1>KendaliKas</h1>
+    <p>Masuk untuk mengelola keuangan Anda</p>
+
+    <button id="googleSignInBtn" class="google-btn">
+      <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google">
+      Masuk dengan Google
+    </button>
+
+    <div id="loading" class="loading">Memproses...</div>
+    <div id="error" class="error"></div>
+  </div>
+
+  <script type="module">
+    // Import Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import {
+      getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+
+    // Firebase Config - GANTI DENGAN MILIKMU
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3d0-uYWGob0_Rd4DSr--enC8MaudBmu0",
+      authDomain: "kendalikas-dc227.firebaseapp.com",
+      projectId: "kendalikas-dc227",
+      storageBucket: "kendalikas-dc227.firebasestorage.app",
+      messagingSenderId: "192223553027",
+      appId: "1:192223553027:web:9922ee5d193226bf42d036",
+      measurementId: "G-PT69WLETYP"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    // UI Elements
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
+    const loading = document.getElementById('loading');
+    const errorDiv = document.getElementById('error');
+
+    // Sign In with Google
+    googleSignInBtn.addEventListener('click', async () => {
+      try {
+        loading.style.display = 'block';
+        errorDiv.textContent = '';
+        googleSignInBtn.disabled = true;
+
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        console.log('User signed in:', user);
+        // Redirect to main app
+        window.location.href = 'index.html';
+
+      } catch (error) {
+        console.error('Sign in error:', error);
+        errorDiv.textContent = 'Gagal masuk. Silakan coba lagi.';
+        loading.style.display = 'none';
+        googleSignInBtn.disabled = false;
+      }
+    });
+
+    // Check if user is already signed in
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in, redirect to main app
+        window.location.href = 'index.html';
+      }
+    });
+  </script>
+</body>
+</html>
