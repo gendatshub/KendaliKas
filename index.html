@@ -413,6 +413,11 @@
           </select>
         </div>
 
+        <div class="action-buttons-container" style="display: flex; gap: 10px; margin-bottom: 20px;">
+          <button id="collaboratorBtn" style="padding: 10px 20px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Collaborator</button>
+          <button id="menuTableBtn" style="padding: 10px 20px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Menu Tabel</button>
+        </div>
+
         <div class="table-container">
           <table class="transaction-table" id="transactionTable">
             <thead>
@@ -432,6 +437,59 @@
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- Modal Collaborator -->
+      <div id="collaboratorModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); display: flex; z-index: 1002; overflow: hidden; backdrop-filter: blur(4px); align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.15s ease;">
+        <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative;">
+          <button class="close-btn" onclick="closeCollaboratorModal()">×</button>
+          <h2>Collaborator</h2>
+          <button id="notificationBtn" style="padding: 10px 20px; background-color: #FF9800; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 20px;">Notifikasi</button>
+          <div id="collaboratorList" style="max-height: 300px; overflow-y: auto;">
+            <!-- List collaborator akan diisi oleh JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Notifikasi Akses -->
+      <div id="notificationModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); display: flex; z-index: 1003; overflow: hidden; backdrop-filter: blur(4px); align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.15s ease;">
+        <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative;">
+          <button class="close-btn" onclick="closeNotificationModal()">×</button>
+          <h2>Notifikasi Akses Tabel</h2>
+          <div id="notificationList" style="max-height: 300px; overflow-y: auto;">
+            <!-- List permintaan akses akan diisi oleh JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Menu Tabel -->
+      <div id="menuTableModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); display: flex; z-index: 1002; overflow: hidden; backdrop-filter: blur(4px); align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.15s ease;">
+        <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative;">
+          <button class="close-btn" onclick="closeMenuTableModal()">×</button>
+          <h2>Menu Tabel</h2>
+          <p><strong>ID Unik Tabel Saat Ini:</strong> <span id="currentTableId"></span></p>
+          <div id="tableList" style="max-height: 200px; overflow-y: auto; margin-bottom: 20px;">
+            <!-- List tabel akan diisi oleh JS -->
+          </div>
+          <button id="addTableBtn" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Tambah Tabel Baru</button>
+        </div>
+      </div>
+
+      <!-- Modal Tambah Tabel Baru -->
+      <div id="addTableModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); display: flex; z-index: 1003; overflow: hidden; backdrop-filter: blur(4px); align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.15s ease;">
+        <div style="background: white; padding: 20px; border-radius: 8px; max-width: 400px; width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative;">
+          <button class="close-btn" onclick="closeAddTableModal()">×</button>
+          <h2>Tambah Tabel Baru</h2>
+          <div style="margin-bottom: 15px;">
+            <label for="searchTableId">Cari ID Unik Tabel Orang Lain:</label><br>
+            <input type="text" id="searchTableId" placeholder="Masukkan ID tabel" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+          <div style="margin-bottom: 15px;">
+            <label for="newTableName">Nama Tabel Baru:</label><br>
+            <input type="text" id="newTableName" placeholder="Masukkan nama tabel" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+          <button id="createTableBtn" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Buat Tabel</button>
         </div>
       </div>
     </section>
@@ -468,7 +526,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import {
   getFirestore, collection, addDoc, onSnapshot, query, orderBy, where,
-  doc, updateDoc, deleteDoc, serverTimestamp
+  doc, updateDoc, deleteDoc, serverTimestamp, getDocs, getDoc
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import {
   getStorage, ref, uploadBytesResumable, getDownloadURL
@@ -608,8 +666,8 @@ let transactionData = []; // diisi dari Firestore
 let editingId = null;     // ketika sedang edit
 
 // subscribe realtime ke koleksi "transactions" untuk user tertentu
-function subscribeTransactions(userId) {
-  const q = query(collection(db, 'transactions'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
+function subscribeTransactions(userId, tableId = null) {
+  const q = query(collection(db, 'transactions'), where('userId', '==', userId), where('tableId', '==', tableId || currentTableId), orderBy('createdAt', 'desc'));
   onSnapshot(q, (snapshot) => {
     transactionData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     // Pastikan field tanggal tersimpan sebagai 'YYYY-MM-DD' saat input agar mudah parse
@@ -636,6 +694,10 @@ onAuthStateChanged(auth, (user) => {
     }
     userInfo.style.display = 'block';
     loadingProfile.style.display = 'none';
+    // Set default table ID jika belum ada
+    if (!currentTableId) {
+      currentTableId = user.uid; // Gunakan userId sebagai default tableId
+    }
     // Subscribe to user's transactions
     subscribeTransactions(user.uid);
   } else {
@@ -719,6 +781,7 @@ document.getElementById('transactionForm').addEventListener('submit', async func
         nama, jenis, jumlah, tanggal, kategori,
         proofUrl: proofUrl || null,
         userId: currentUser.uid,
+        tableId: currentTableId,
         uploader: currentUser.email || currentUser.displayName || 'Unknown',
         updatedAt: serverTimestamp()
       };
@@ -729,6 +792,7 @@ document.getElementById('transactionForm').addEventListener('submit', async func
         nama, jenis, jumlah, tanggal, kategori,
         proofUrl: proofUrl || null,
         userId: currentUser.uid,
+        tableId: currentTableId,
         uploader: currentUser.email || currentUser.displayName || 'Unknown',
         createdAt: serverTimestamp()
       });
@@ -887,6 +951,263 @@ document.getElementById('tanggal').valueAsDate = new Date();
 // Ubah tombol submit jadi punya id agar bisa diganti label saat edit
 const submitBtn = document.querySelector('#transactionForm button[type="submit"]');
 if (submitBtn) submitBtn.id = 'submitBtn';
+
+/* -----------------------
+   12) MODAL COLLABORATOR & MENU TABEL
+   ----------------------- */
+
+// Event listeners untuk tombol
+document.getElementById('collaboratorBtn').addEventListener('click', openCollaboratorModal);
+document.getElementById('menuTableBtn').addEventListener('click', openMenuTableModal);
+document.getElementById('notificationBtn').addEventListener('click', openNotificationModal);
+document.getElementById('addTableBtn').addEventListener('click', openAddTableModal);
+document.getElementById('createTableBtn').addEventListener('click', createNewTable);
+
+// Fungsi untuk membuka modal
+function openCollaboratorModal() {
+  document.getElementById('collaboratorModal').style.opacity = '1';
+  document.getElementById('collaboratorModal').style.visibility = 'visible';
+  loadCollaborators();
+}
+
+function openNotificationModal() {
+  document.getElementById('notificationModal').style.opacity = '1';
+  document.getElementById('notificationModal').style.visibility = 'visible';
+  loadNotifications();
+}
+
+function openMenuTableModal() {
+  document.getElementById('menuTableModal').style.opacity = '1';
+  document.getElementById('menuTableModal').style.visibility = 'visible';
+  loadTables();
+}
+
+function openAddTableModal() {
+  document.getElementById('addTableModal').style.opacity = '1';
+  document.getElementById('addTableModal').style.visibility = 'visible';
+}
+
+// Fungsi untuk menutup modal
+function closeCollaboratorModal() {
+  document.getElementById('collaboratorModal').style.opacity = '0';
+  document.getElementById('collaboratorModal').style.visibility = 'hidden';
+}
+
+function closeNotificationModal() {
+  document.getElementById('notificationModal').style.opacity = '0';
+  document.getElementById('notificationModal').style.visibility = 'hidden';
+}
+
+function closeMenuTableModal() {
+  document.getElementById('menuTableModal').style.opacity = '0';
+  document.getElementById('menuTableModal').style.visibility = 'hidden';
+}
+
+function closeAddTableModal() {
+  document.getElementById('addTableModal').style.opacity = '0';
+  document.getElementById('addTableModal').style.visibility = 'hidden';
+}
+
+// Fungsi untuk memuat data collaborator
+async function loadCollaborators() {
+  const collaboratorList = document.getElementById('collaboratorList');
+  collaboratorList.innerHTML = '<p>Loading...</p>';
+  try {
+    // Asumsi ada koleksi 'collaborators' di Firestore
+    const q = query(collection(db, 'collaborators'), where('tableId', '==', currentTableId));
+    const snapshot = await getDocs(q);
+    let html = '';
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      html += `
+        <div style="display: flex; align-items: center; margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+          <img src="${data.photoURL || 'https://via.placeholder.com/50'}" alt="Profile" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px;">
+          <div style="flex: 1;">
+            <p><strong>${data.name}</strong></p>
+            <p>${data.email}</p>
+          </div>
+          <select onchange="changeRole('${doc.id}', this.value)" style="padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="viewer" ${data.role === 'viewer' ? 'selected' : ''}>Viewer</option>
+            <option value="editor" ${data.role === 'editor' ? 'selected' : ''}>Editor</option>
+          </select>
+        </div>
+      `;
+    });
+    collaboratorList.innerHTML = html || '<p>Tidak ada collaborator</p>';
+  } catch (error) {
+    console.error('Error loading collaborators:', error);
+    collaboratorList.innerHTML = '<p>Gagal memuat data</p>';
+  }
+}
+
+// Fungsi untuk memuat notifikasi akses
+async function loadNotifications() {
+  const notificationList = document.getElementById('notificationList');
+  notificationList.innerHTML = '<p>Loading...</p>';
+  try {
+    // Asumsi ada koleksi 'accessRequests' di Firestore
+    const q = query(collection(db, 'accessRequests'), where('tableOwnerId', '==', currentUser.uid));
+    const snapshot = await getDocs(q);
+    let html = '';
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      html += `
+        <div style="display: flex; align-items: center; margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+          <img src="${data.photoURL || 'https://via.placeholder.com/50'}" alt="Profile" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px;">
+          <div style="flex: 1;">
+            <p><strong>${data.name}</strong></p>
+            <p>${data.email}</p>
+          </div>
+          <div>
+            <button onclick="acceptRequest('${doc.id}')" style="padding: 5px 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; margin-right: 5px;">Terima</button>
+            <button onclick="rejectRequest('${doc.id}')" style="padding: 5px 10px; background-color: #f44336; color: white; border: none; border-radius: 4px;">Tolak</button>
+          </div>
+        </div>
+      `;
+    });
+    notificationList.innerHTML = html || '<p>Tidak ada permintaan akses</p>';
+  } catch (error) {
+    console.error('Error loading notifications:', error);
+    notificationList.innerHTML = '<p>Gagal memuat data</p>';
+  }
+}
+
+// Fungsi untuk memuat list tabel
+async function loadTables() {
+  const tableList = document.getElementById('tableList');
+  const currentTableIdSpan = document.getElementById('currentTableId');
+  tableList.innerHTML = '<p>Loading...</p>';
+  try {
+    // Asumsi ada koleksi 'tables' di Firestore
+    const q = query(collection(db, 'tables'), where('ownerId', '==', currentUser.uid));
+    const snapshot = await getDocs(q);
+    let html = '';
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      html += `
+        <div style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 5px; cursor: pointer;" onclick="selectTable('${doc.id}')">
+          <p><strong>${data.name}</strong></p>
+          <p>ID: ${doc.id}</p>
+        </div>
+      `;
+    });
+    tableList.innerHTML = html || '<p>Tidak ada tabel</p>';
+    // Set current table ID (asumsi ada variable currentTableId)
+    currentTableIdSpan.textContent = currentTableId || 'Tidak ada';
+  } catch (error) {
+    console.error('Error loading tables:', error);
+    tableList.innerHTML = '<p>Gagal memuat data</p>';
+  }
+}
+
+// Fungsi untuk mengubah role collaborator
+async function changeRole(collaboratorId, newRole) {
+  try {
+    await updateDoc(doc(db, 'collaborators', collaboratorId), { role: newRole });
+    alert('Role berhasil diubah');
+    loadCollaborators(); // Reload list
+  } catch (error) {
+    console.error('Error changing role:', error);
+    alert('Gagal mengubah role');
+  }
+}
+
+// Fungsi untuk menerima permintaan akses
+async function acceptRequest(requestId) {
+  try {
+    const requestDoc = await getDoc(doc(db, 'accessRequests', requestId));
+    const data = requestDoc.data();
+    // Tambahkan ke collaborators
+    await addDoc(collection(db, 'collaborators'), {
+      tableId: data.tableId,
+      userId: data.requesterId,
+      name: data.name,
+      email: data.email,
+      photoURL: data.photoURL,
+      role: 'viewer' // Default role
+    });
+    // Hapus request
+    await deleteDoc(doc(db, 'accessRequests', requestId));
+    alert('Permintaan akses diterima');
+    loadNotifications(); // Reload list
+  } catch (error) {
+    console.error('Error accepting request:', error);
+    alert('Gagal menerima permintaan');
+  }
+}
+
+// Fungsi untuk menolak permintaan akses
+async function rejectRequest(requestId) {
+  try {
+    await deleteDoc(doc(db, 'accessRequests', requestId));
+    alert('Permintaan akses ditolak');
+    loadNotifications(); // Reload list
+  } catch (error) {
+    console.error('Error rejecting request:', error);
+    alert('Gagal menolak permintaan');
+  }
+}
+
+// Fungsi untuk memilih tabel
+function selectTable(tableId) {
+  currentTableId = tableId;
+  // Reload transactions untuk tabel yang dipilih
+  subscribeTransactions(currentUser.uid, tableId);
+  closeMenuTableModal();
+}
+
+// Fungsi untuk membuat tabel baru
+async function createNewTable() {
+  const newTableName = document.getElementById('newTableName').value.trim();
+  const searchTableId = document.getElementById('searchTableId').value.trim();
+  if (!newTableName) {
+    alert('Nama tabel tidak boleh kosong');
+    return;
+  }
+  try {
+    const tableRef = await addDoc(collection(db, 'tables'), {
+      name: newTableName,
+      ownerId: currentUser.uid,
+      createdAt: serverTimestamp()
+    });
+    if (searchTableId) {
+      // Kirim permintaan akses ke tabel orang lain
+      await addDoc(collection(db, 'accessRequests'), {
+        tableId: searchTableId,
+        requesterId: currentUser.uid,
+        name: currentUser.displayName || 'Unknown',
+        email: currentUser.email,
+        photoURL: currentUser.photoURL,
+        tableOwnerId: searchTableId // Asumsi tableId adalah ownerId, perlu disesuaikan
+      });
+      alert('Permintaan akses dikirim dan tabel baru dibuat');
+    } else {
+      alert('Tabel baru berhasil dibuat');
+    }
+    document.getElementById('newTableName').value = '';
+    document.getElementById('searchTableId').value = '';
+    closeAddTableModal();
+    loadTables(); // Reload list
+  } catch (error) {
+    console.error('Error creating table:', error);
+    alert('Gagal membuat tabel');
+  }
+}
+
+// Variable untuk current table ID
+let currentTableId = null; // Akan di-set saat login atau pilih tabel
+
+// Update subscribeTransactions untuk support tableId
+function subscribeTransactions(userId, tableId = null) {
+  const q = query(collection(db, 'transactions'), where('userId', '==', userId), where('tableId', '==', tableId || currentTableId), orderBy('createdAt', 'desc'));
+  onSnapshot(q, (snapshot) => {
+    transactionData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    displayTransactions();
+    updateSummary();
+  }, (err) => {
+    console.error("Error onSnapshot:", err);
+  });
+}
 
 </script>
 
