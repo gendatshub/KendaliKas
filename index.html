@@ -522,7 +522,15 @@
         <div>
           <button class="close-btn" onclick="closeTableMenu()">×</button>
           <h1>Menu Tabel</h1>
-          <!-- Konten akan ditambahkan nanti -->
+          <div id="tableList">
+            <!-- Tables will be loaded here -->
+          </div>
+          <button id="createTableBtn" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px;">Buat Tabel Baru</button>
+          <div id="createTableForm" style="display: none; margin-top: 20px;">
+            <input type="text" id="newTableName" placeholder="Nama Tabel" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <button id="saveTableBtn" style="width: 100%; padding: 10px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Simpan</button>
+            <button id="cancelTableBtn" style="width: 100%; padding: 10px; background-color: #ccc; color: black; border: none; border-radius: 4px; cursor: pointer; margin-top: 5px;">Batal</button>
+          </div>
         </div>
       </div>
       
@@ -603,7 +611,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import {
   getFirestore, collection, addDoc, onSnapshot, query, orderBy, where,
-  doc, updateDoc, deleteDoc, serverTimestamp
+  doc, updateDoc, deleteDoc, serverTimestamp, getDocs, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import {
   getStorage, ref, uploadBytesResumable, getDownloadURL
@@ -627,11 +635,105 @@ const firebaseConfig = {
    ----------------------- */
 
 const app = initializeApp(firebaseConfig);
+
+/* -----------------------
+   3.1) TABLE FUNCTIONS
+   ----------------------- */
+function subscribeTables(userId) {
+  const q = query(collection(db, 'tables'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
+  onSnapshot(q, async (snapshot) => {
+    tablesData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (tablesData.length === 0) {
+      await createDefaultTable(userId);
+    } else {
+      if (!currentTable || !tablesData.find(t => t.id === currentTable)) {
+        currentTable = tablesData[0].id;
+      }
+      await migrateTransactions(userId);
+      displayTables();
+      subscribeTransactions(userId, currentTable);
+    }
+  });
+}
+
+async function createDefaultTable(userId) {
+  try {
+    const docRef = await addDoc(collection(db, 'tables'), {
+      userId,
+      name: 'Default',
+      createdAt: serverTimestamp()
+    });
+    currentTable = docRef.id;
+  } catch (err) {
+    console.error('Error creating default table:', err);
+  }
+}
+
+async function migrateTransactions(userId) {
+  const q = query(collection(db, 'transactions'), where('userId', '==', userId), where('tableId', '==', null));
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) return;
+  const batch = writeBatch(db);
+  snapshot.docs.forEach(doc => {
+    batch.update(doc.ref, { tableId: currentTable });
+  });
+  await batch.commit();
+}
+
+function displayTables() {
+  const tableList = document.getElementById('tableList');
+  let html = '';
+  tablesData.forEach(table => {
+    const isActive = table.id === currentTable;
+    html += `
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px; background: ${isActive ? '#e3f2fd' : 'white'};">
+        <span>${table.name}</span>
+        <div>
+          ${!isActive ? `<button onclick="switchTable('${table.id}')" style="padding: 5px 10px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Pindah</button>` : ''}
+          <button onclick="deleteTable('${table.id}')" style="padding: 5px 10px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 5px;">Hapus</button>
+        </div>
+      </div>
+    `;
+  });
+  tableList.innerHTML = html;
+}
+
+window.switchTable = function(tableId) {
+  currentTable = tableId;
+  displayTables();
+  subscribeTransactions(currentUser.uid, currentTable);
+  closeTableMenu();
+}
+
+window.deleteTable = async function(tableId) {
+  if (tablesData.length <= 1) {
+    alert('Tidak bisa menghapus tabel terakhir.');
+    return;
+  }
+  const table = tablesData.find(t => t.id === tableId);
+  if (!confirm(`Hapus tabel "${table.name}"? Transaksi akan dipindah ke tabel lain.`)) return;
+  const otherTable = tablesData.find(t => t.id !== tableId);
+  try {
+    const q = query(collection(db, 'transactions'), where('userId', '==', currentUser.uid), where('tableId', '==', tableId));
+    const snapshot = await getDocs(q);
+    const batch = writeBatch(db);
+    snapshot.docs.forEach(doc => {
+      batch.update(doc.ref, { tableId: otherTable.id });
+    });
+    await batch.commit();
+    await deleteDoc(doc(db, 'tables', tableId));
+  } catch (err) {
+    console.error('Error deleting table:', err);
+    alert('Gagal menghapus tabel.');
+  }
+}
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
 let currentUser = null; // to store current user
+let currentTable = null; // to store current table id
+let tablesData = []; // array of tables
 
 /* -----------------------
    4) UI / NAV / MODAL (sama seperti sebelumnya)
@@ -764,9 +866,9 @@ if (jumlahInput) {
 let transactionData = []; // diisi dari Firestore
 let editingId = null;     // ketika sedang edit
 
-// subscribe realtime ke koleksi "transactions" untuk user tertentu
-function subscribeTransactions(userId) {
-  const q = query(collection(db, 'transactions'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
+// subscribe realtime ke koleksi "transactions" untuk user tertentu dan tabel tertentu
+function subscribeTransactions(userId, tableId) {
+  const q = query(collection(db, 'transactions'), where('userId', '==', userId), where('tableId', '==', tableId), orderBy('createdAt', 'desc'));
   onSnapshot(q, (snapshot) => {
     transactionData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     // Pastikan field tanggal tersimpan sebagai 'YYYY-MM-DD' saat input agar mudah parse
@@ -793,8 +895,8 @@ onAuthStateChanged(auth, (user) => {
     }
     userInfo.style.display = 'block';
     loadingProfile.style.display = 'none';
-    // Subscribe to user's transactions
-    subscribeTransactions(user.uid);
+    // Subscribe to user's tables
+    subscribeTables(user.uid);
   } else {
     currentUser = null;
     // User not logged in, redirect to login
@@ -886,6 +988,7 @@ document.getElementById('transactionForm').addEventListener('submit', async func
         nama, jenis, jumlah, tanggal, kategori,
         proofUrl: proofUrl || null,
         userId: currentUser.uid,
+        tableId: currentTable,
         uploader: currentUser.email || currentUser.displayName || 'Unknown',
         createdAt: serverTimestamp()
       });
