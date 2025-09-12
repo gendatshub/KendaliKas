@@ -628,8 +628,8 @@
       </div>
 
       <div style="padding: 20px;">
-        <h2>Data Transaksi</h2>
-        
+        <h2 id="dataTransaksiHeader">Data Transaksi</h2>
+
         <div class="search-container">
           <input type="text" class="search-input" id="searchInput" placeholder="Cari transaksi..." onkeyup="filterTransactions()">
           <select class="filter-select" id="filterType" onchange="filterTransactions()">
@@ -984,6 +984,10 @@ function subscribeTransactions(userId, tableId) {
     // Pastikan field tanggal tersimpan sebagai 'YYYY-MM-DD' saat input agar mudah parse
     displayTransactions();
     updateSummary();
+    const table = tablesData.find(t => t.id === tableId);
+    if (table) {
+      document.getElementById('dataTransaksiHeader').textContent = `Data Transaksi - ${table.name}`;
+    }
   }, (err) => {
     console.error("Error onSnapshot:", err);
   });
