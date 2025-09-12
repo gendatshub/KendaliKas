@@ -153,6 +153,82 @@
       position: relative;
     }
 
+    /* Modal for Collaborator Menu */
+    #menuCollaborator {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.4);
+      display: flex;
+      z-index: 1002;
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.15s ease;
+    }
+
+    #menuCollaborator.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #menuCollaborator.closing {
+      pointer-events: none;
+    }
+
+    #menuCollaborator > div {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    /* Modal for Table Menu */
+    #menuTable {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.4);
+      display: flex;
+      z-index: 1002;
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.15s ease;
+    }
+
+    #menuTable.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #menuTable.closing {
+      pointer-events: none;
+    }
+
+    #menuTable > div {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
     .close-btn {
       position: absolute;
       top: 10px;
@@ -320,7 +396,38 @@
     .delete-btn:hover {
       background-color: #c9302c;
     }
-  </style>
+    </style>
+    <style>
+      .icon-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #2196F3;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      .icon-button:hover {
+        background-color: #e3f2fd;
+        color: #1769aa;
+      }
+      .icon-button:focus {
+        outline: 2px solid #1769aa;
+        outline-offset: 2px;
+      }
+      .icon-button.circle {
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+      }
+      .icon-button.square {
+        border-radius: 6px;
+        width: 36px;
+        height: 36px;
+      }
+    </style>
 </head>
   <body>
 
@@ -366,7 +473,7 @@
               <label for="nama">Nama Transaksi:</label><br>
               <input type="text" id="nama" name="nama" required style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
             </div>
-            
+
             <div style="margin-bottom: 15px;">
               <label for="jenis">Jenis Transaksi:</label><br>
               <select id="jenis" name="jenis" required style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
@@ -375,17 +482,17 @@
                 <option value="pengeluaran">Pengeluaran</option>
               </select>
             </div>
-            
+
             <div style="margin-bottom: 15px;">
               <label for="jumlah">Jumlah (Rp):</label><br>
               <input type="text" id="jumlah" name="jumlah" required style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
             </div>
-            
+
             <div style="margin-bottom: 15px;">
               <label for="tanggal">Tanggal:</label><br>
               <input type="date" id="tanggal" name="tanggal" required style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
             </div>
-            
+
             <div style="margin-bottom: 15px;">
               <label for="kategori">Kategori:</label><br>
               <input type="text" id="kategori" name="kategori" placeholder="Contoh: Gaji, Belanja, Transport" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
@@ -400,6 +507,24 @@
           </form>
         </div>
       </div>
+
+      <!-- Modal for Collaborator Menu -->
+      <div id="menuCollaborator">
+        <div>
+          <button class="close-btn" onclick="closeCollaboratorMenu()">×</button>
+          <h1>Menu Collaborator</h1>
+          <!-- Konten akan ditambahkan nanti -->
+        </div>
+      </div>
+
+      <!-- Modal for Table Menu -->
+      <div id="menuTable">
+        <div>
+          <button class="close-btn" onclick="closeTableMenu()">×</button>
+          <h1>Menu Tabel</h1>
+          <!-- Konten akan ditambahkan nanti -->
+        </div>
+      </div>
       
       <div style="padding: 20px;">
         <h2>Data Transaksi</h2>
@@ -411,6 +536,16 @@
             <option value="pemasukan">Pemasukan</option>
             <option value="pengeluaran">Pengeluaran</option>
           </select>
+          <button id="btnCollaborator" class="icon-button circle" aria-label="Menu Collaborator" title="Menu Collaborator" type="button" tabindex="0" style="margin-left: auto;">
+            <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </button>
+          <button id="btnTable" class="icon-button square" aria-label="Menu Tabel" title="Menu Tabel" type="button" tabindex="0">
+            <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M3 3h18v18H3V3zm2 2v4h4V5H5zm6 0v4h4V5h-4zm6 0v4h-4V5h4zM5 11v4h4v-4H5zm6 0v4h4v-4h-4zm6 0v4h-4v-4h4zM5 17v2h14v-2H5z"/>
+            </svg>
+          </button>
         </div>
 
         <div class="table-container">
@@ -581,6 +716,30 @@ links.forEach(link => {
   };
   menuTambahData.addEventListener('click', (e) => {
     if (e.target === menuTambahData) window.closeMenu();
+  });
+
+  // Collaborator Menu Modal
+  const btnCollaborator = document.getElementById('btnCollaborator');
+  const menuCollaborator = document.getElementById('menuCollaborator');
+
+  if (btnCollaborator) btnCollaborator.addEventListener('click', () => { menuCollaborator.classList.add('show'); });
+  window.closeCollaboratorMenu = function() {
+    menuCollaborator.classList.remove('show');
+  };
+  menuCollaborator.addEventListener('click', (e) => {
+    if (e.target === menuCollaborator) window.closeCollaboratorMenu();
+  });
+
+  // Table Menu Modal
+  const btnTable = document.getElementById('btnTable');
+  const menuTable = document.getElementById('menuTable');
+
+  if (btnTable) btnTable.addEventListener('click', () => { menuTable.classList.add('show'); });
+  window.closeTableMenu = function() {
+    menuTable.classList.remove('show');
+  };
+  menuTable.addEventListener('click', (e) => {
+    if (e.target === menuTable) window.closeTableMenu();
   });
 
 // Format input jumlah with dots for readability (same behavior)

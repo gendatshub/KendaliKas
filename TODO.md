@@ -1,14 +1,7 @@
-# TODO: Add Uploader Column to Transaction Table
+# TODO for Adding Menus to Collaborator and Table Buttons
 
-## Tasks
-- [x] Modify addDoc to include uploader field
-- [x] Modify updateDoc to include uploader field
-- [x] Update table header to include "Pengupload" column
-- [x] Update displayTransactions to show uploader in new column
-- [x] Update displayFilteredTransactions to show uploader in new column
-- [x] Update colspan in empty messages to 7
-- [ ] Test adding and editing transactions to verify uploader display
-
-## Completed
-- [x] Analyze code and plan changes
-- [x] Create TODO.md
+- [x] Create a new modal div for collaborator menu, similar to #menutambahdata but empty (title: "Menu Collaborator", close button).
+- [x] Create a new modal div for table menu, similar to #menutambahdata but empty (title: "Menu Tabel", close button).
+- [x] Add CSS styles for the new modals (copy from #menutambahdata).
+- [x] Add event listeners in JavaScript to show the modals when btnCollaborator and btnTable are clicked.
+- [x] Add close functionality for the new modals (close button and click outside).
