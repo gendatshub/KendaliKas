@@ -29,20 +29,43 @@
     }
 
     section {
-      opacity: 0;
-      pointer-events: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    section.active {
       opacity: 1;
       pointer-events: auto;
       position: relative;
       height: auto;
+      display: none;
+    }
+
+    section.active {
+      display: block;
+    }
+
+    /* Loading state */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .loading-spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #2196F3;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     /* Bottom Navigation Bar */
@@ -469,6 +492,11 @@
 </head>
   <body>
 
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+  </div>
+
   <!-- Hamburger Menu Button -->
   <button class="menu-toggle" id="menuToggle">
     <span></span>
@@ -477,7 +505,7 @@
   </button>
 
   <main>
-    <section id="dashboard" class="active">
+    <section id="dashboard" class="active" style="display: block;">
       <div style="padding: 20px;">
         <h1>Dashboard Keuangan</h1>
 
@@ -601,6 +629,11 @@
           </button>
         </div>
 
+        <div class="action-buttons-container" style="display: flex; gap: 10px; margin-bottom: 20px;">
+          <button id="collaboratorBtn" style="padding: 10px 20px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Collaborator</button>
+          <button id="menuTableBtn" style="padding: 10px 20px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Menu Tabel</button>
+        </div>
+
         <div class="table-container">
           <table class="transaction-table" id="transactionTable">
             <thead>
@@ -620,6 +653,59 @@
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- Modal Collaborator -->
+      <div id="collaboratorModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); display: flex; z-index: 1002; overflow: hidden; backdrop-filter: blur(4px); align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.15s ease;">
+        <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative;">
+          <button class="close-btn" onclick="closeCollaboratorModal()">×</button>
+          <h2>Collaborator</h2>
+          <button id="notificationBtn" style="padding: 10px 20px; background-color: #FF9800; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 20px;">Notifikasi</button>
+          <div id="collaboratorList" style="max-height: 300px; overflow-y: auto;">
+            <!-- List collaborator akan diisi oleh JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Notifikasi Akses -->
+      <div id="notificationModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); display: flex; z-index: 1003; overflow: hidden; backdrop-filter: blur(4px); align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.15s ease;">
+        <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative;">
+          <button class="close-btn" onclick="closeNotificationModal()">×</button>
+          <h2>Notifikasi Akses Tabel</h2>
+          <div id="notificationList" style="max-height: 300px; overflow-y: auto;">
+            <!-- List permintaan akses akan diisi oleh JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Menu Tabel -->
+      <div id="menuTableModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); display: flex; z-index: 1002; overflow: hidden; backdrop-filter: blur(4px); align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.15s ease;">
+        <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative;">
+          <button class="close-btn" onclick="closeMenuTableModal()">×</button>
+          <h2>Menu Tabel</h2>
+          <p><strong>ID Unik Tabel Saat Ini:</strong> <span id="currentTableId"></span></p>
+          <div id="tableList" style="max-height: 200px; overflow-y: auto; margin-bottom: 20px;">
+            <!-- List tabel akan diisi oleh JS -->
+          </div>
+          <button id="addTableBtn" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Tambah Tabel Baru</button>
+        </div>
+      </div>
+
+      <!-- Modal Tambah Tabel Baru -->
+      <div id="addTableModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); display: flex; z-index: 1003; overflow: hidden; backdrop-filter: blur(4px); align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.15s ease;">
+        <div style="background: white; padding: 20px; border-radius: 8px; max-width: 400px; width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative;">
+          <button class="close-btn" onclick="closeAddTableModal()">×</button>
+          <h2>Tambah Tabel Baru</h2>
+          <div style="margin-bottom: 15px;">
+            <label for="searchTableId">Cari ID Unik Tabel Orang Lain:</label><br>
+            <input type="text" id="searchTableId" placeholder="Masukkan ID tabel" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+          <div style="margin-bottom: 15px;">
+            <label for="newTableName">Nama Tabel Baru:</label><br>
+            <input type="text" id="newTableName" placeholder="Masukkan nama tabel" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+          <button id="createTableBtn" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Buat Tabel</button>
         </div>
       </div>
     </section>
@@ -648,7 +734,7 @@
 
   <script type="module">
 /* -----------------------
-   1) IMPORT FIREBASE SDK
+   1) IMPORT FIREBASE SDK WITH ERROR HANDLING
    ----------------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
@@ -656,122 +742,32 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import {
   getFirestore, collection, addDoc, onSnapshot, query, orderBy, where,
-  doc, updateDoc, deleteDoc, serverTimestamp, getDocs, writeBatch
+  doc, updateDoc, deleteDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import {
   getStorage, ref, uploadBytesResumable, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
-/* -----------------------
-   2) FIREBASE CONFIG - GANTI DENGAN MILIKMU
-   ----------------------- */
-const firebaseConfig = {
-  apiKey: "AIzaSyA3d0-uYWGob0_Rd4DSr--enC8MaudBmu0",
-  authDomain: "kendalikas-dc227.firebaseapp.com",
-  projectId: "kendalikas-dc227",
-  storageBucket: "kendalikas-dc227.firebasestorage.app",
-  messagingSenderId: "192223553027",
-  appId: "1:192223553027:web:9922ee5d193226bf42d036",
-  measurementId: "G-PT69WLETYP"
-};
+  /* -----------------------
+     2) FIREBASE CONFIG
+     ----------------------- */
+  const firebaseConfig = {
+    apiKey: "AIzaSyA3d0-uYWGob0_Rd4DSr--enC8MaudBmu0",
+    authDomain: "kendalikas-dc227.firebaseapp.com",
+    projectId: "kendalikas-dc227",
+    storageBucket: "kendalikas-dc227.firebasestorage.com",
+    messagingSenderId: "192223553027",
+    appId: "1:192223553027:web:9922ee5d193226bf42d036",
+    measurementId: "G-PT69WLETYP"
+  };
 
 /* -----------------------
    3) INISIALISASI
    ----------------------- */
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js";
 
 const app = initializeApp(firebaseConfig);
-
-/* -----------------------
-   3.1) TABLE FUNCTIONS
-   ----------------------- */
-function subscribeTables(userId) {
-  const q = query(collection(db, 'tables'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
-  onSnapshot(q, async (snapshot) => {
-    tablesData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-    if (tablesData.length === 0) {
-      await createDefaultTable(userId);
-    } else {
-      if (!currentTable || !tablesData.find(t => t.id === currentTable)) {
-        currentTable = tablesData[0].id;
-      }
-      await migrateTransactions(userId);
-      displayTables();
-      subscribeTransactions(userId, currentTable);
-    }
-  });
-}
-
-async function createDefaultTable(userId) {
-  try {
-    const docRef = await addDoc(collection(db, 'tables'), {
-      userId,
-      name: 'Default',
-      createdAt: serverTimestamp()
-    });
-    currentTable = docRef.id;
-  } catch (err) {
-    console.error('Error creating default table:', err);
-  }
-}
-
-async function migrateTransactions(userId) {
-  const q = query(collection(db, 'transactions'), where('userId', '==', userId), where('tableId', '==', null));
-  const snapshot = await getDocs(q);
-  if (snapshot.empty) return;
-  const batch = writeBatch(db);
-  snapshot.docs.forEach(doc => {
-    batch.update(doc.ref, { tableId: currentTable });
-  });
-  await batch.commit();
-}
-
-function displayTables() {
-  const tableList = document.getElementById('tableList');
-  let html = '';
-  tablesData.forEach(table => {
-    const isActive = table.id === currentTable;
-    html += `
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px; background: ${isActive ? '#e3f2fd' : 'white'};">
-        <span>${table.name}</span>
-        <div>
-          ${!isActive ? `<button onclick="switchTable('${table.id}')" style="padding: 5px 10px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Pindah</button>` : ''}
-          <button onclick="deleteTable('${table.id}')" style="padding: 5px 10px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 5px;">Hapus</button>
-        </div>
-      </div>
-    `;
-  });
-  tableList.innerHTML = html;
-}
-
-window.switchTable = function(tableId) {
-  currentTable = tableId;
-  displayTables();
-  subscribeTransactions(currentUser.uid, currentTable);
-  closeTableMenu();
-}
-
-window.deleteTable = async function(tableId) {
-  if (tablesData.length <= 1) {
-    alert('Tidak bisa menghapus tabel terakhir.');
-    return;
-  }
-  const table = tablesData.find(t => t.id === tableId);
-  if (!confirm(`Hapus tabel "${table.name}"? Transaksi akan dipindah ke tabel lain.`)) return;
-  const otherTable = tablesData.find(t => t.id !== tableId);
-  try {
-    const q = query(collection(db, 'transactions'), where('userId', '==', currentUser.uid), where('tableId', '==', tableId));
-    const snapshot = await getDocs(q);
-    const batch = writeBatch(db);
-    snapshot.docs.forEach(doc => {
-      batch.update(doc.ref, { tableId: otherTable.id });
-    });
-    await batch.commit();
-    await deleteDoc(doc(db, 'tables', tableId));
-  } catch (err) {
-    console.error('Error deleting table:', err);
-    alert('Gagal menghapus tabel.');
-  }
-}
+const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
@@ -802,23 +798,13 @@ const links = document.querySelectorAll('nav a');
 const sections = document.querySelectorAll('main section');
 
 function fadeOut(element, callback) {
-  element.style.transition = 'opacity 0.15s ease';
-  element.style.opacity = '0';
-  setTimeout(() => {
-    element.style.pointerEvents = 'none';
-    if (callback) callback();
-  }, 150);
+  element.classList.remove('active');
+  if (callback) setTimeout(callback, 50);
 }
 
 function fadeIn(element, callback) {
-  element.style.transition = 'opacity 0.15s ease';
-  element.style.opacity = '0';
-  element.style.pointerEvents = 'auto';
   element.classList.add('active');
-  setTimeout(() => {
-    element.style.opacity = '1';
-    if (callback) callback();
-  }, 50);
+  if (callback) setTimeout(callback, 50);
 }
 
 links.forEach(link => {
@@ -922,9 +908,9 @@ if (jumlahInput) {
 let transactionData = []; // diisi dari Firestore
 let editingId = null;     // ketika sedang edit
 
-// subscribe realtime ke koleksi "transactions" untuk user tertentu dan tabel tertentu
-function subscribeTransactions(userId, tableId) {
-  const q = query(collection(db, 'transactions'), where('userId', '==', userId), where('tableId', '==', tableId), orderBy('createdAt', 'desc'));
+// subscribe realtime ke koleksi "transactions" untuk user tertentu
+function subscribeTransactions(userId) {
+  const q = query(collection(db, 'transactions'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
   onSnapshot(q, (snapshot) => {
     transactionData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     // Pastikan field tanggal tersimpan sebagai 'YYYY-MM-DD' saat input agar mudah parse
@@ -951,8 +937,8 @@ onAuthStateChanged(auth, (user) => {
     }
     userInfo.style.display = 'block';
     loadingProfile.style.display = 'none';
-    // Subscribe to user's tables
-    subscribeTables(user.uid);
+    // Subscribe to user's transactions
+    subscribeTransactions(user.uid);
   } else {
     currentUser = null;
     // User not logged in, redirect to login
@@ -1034,6 +1020,7 @@ document.getElementById('transactionForm').addEventListener('submit', async func
         nama, jenis, jumlah, tanggal, kategori,
         proofUrl: proofUrl || null,
         userId: currentUser.uid,
+        tableId: currentTableId,
         uploader: currentUser.email || currentUser.displayName || 'Unknown',
         updatedAt: serverTimestamp()
       };
@@ -1044,7 +1031,6 @@ document.getElementById('transactionForm').addEventListener('submit', async func
         nama, jenis, jumlah, tanggal, kategori,
         proofUrl: proofUrl || null,
         userId: currentUser.uid,
-        tableId: currentTable,
         uploader: currentUser.email || currentUser.displayName || 'Unknown',
         createdAt: serverTimestamp()
       });
@@ -1203,32 +1189,6 @@ document.getElementById('tanggal').valueAsDate = new Date();
 // Ubah tombol submit jadi punya id agar bisa diganti label saat edit
 const submitBtn = document.querySelector('#transactionForm button[type="submit"]');
 if (submitBtn) submitBtn.id = 'submitBtn';
-
-// Event listeners for create table
-document.getElementById('createTableBtn').addEventListener('click', () => {
-  createTableModal.classList.add('show');
-});
-
-document.getElementById('saveTableBtn').addEventListener('click', async () => {
-  const name = document.getElementById('newTableName').value.trim();
-  if (!name) {
-    alert('Nama tabel tidak boleh kosong.');
-    return;
-  }
-  try {
-    await addDoc(collection(db, 'tables'), {
-      userId: currentUser.uid,
-      name,
-      createdAt: serverTimestamp()
-    });
-    closeCreateTableModal();
-  } catch (err) {
-    console.error('Error creating table:', err);
-    alert('Gagal membuat tabel.');
-  }
-});
-
-
 
 </script>
 
