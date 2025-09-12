@@ -229,6 +229,44 @@
       position: relative;
     }
 
+    /* Modal for Create Table */
+    #createTableModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.4);
+      display: flex;
+      z-index: 1003;
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.15s ease;
+    }
+
+    #createTableModal.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #createTableModal.closing {
+      pointer-events: none;
+    }
+
+    #createTableModal > div {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
     .close-btn {
       position: absolute;
       top: 10px;
@@ -525,15 +563,22 @@
           <div id="tableList">
             <!-- Tables will be loaded here -->
           </div>
-          <button id="createTableBtn" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px;">Buat Tabel Baru</button>
-          <div id="createTableForm" style="display: none; margin-top: 20px;">
+          <button id="createTableBtn" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px;">Tambah Tabel</button>
+        </div>
+      </div>
+
+      <!-- Modal for Create Table -->
+      <div id="createTableModal">
+        <div>
+          <button class="close-btn" onclick="closeCreateTableModal()">×</button>
+          <h1>Tambah Tabel</h1>
+          <div id="createTableForm">
             <input type="text" id="newTableName" placeholder="Nama Tabel" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
             <button id="saveTableBtn" style="width: 100%; padding: 10px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Simpan</button>
-            <button id="cancelTableBtn" style="width: 100%; padding: 10px; background-color: #ccc; color: black; border: none; border-radius: 4px; cursor: pointer; margin-top: 5px;">Batal</button>
           </div>
         </div>
       </div>
-      
+
       <div style="padding: 20px;">
         <h2>Data Transaksi</h2>
         
@@ -844,6 +889,17 @@ links.forEach(link => {
     if (e.target === menuTable) window.closeTableMenu();
   });
 
+  // Create Table Modal
+  const createTableModal = document.getElementById('createTableModal');
+
+  window.closeCreateTableModal = function() {
+    createTableModal.classList.remove('show');
+    document.getElementById('newTableName').value = '';
+  };
+  createTableModal.addEventListener('click', (e) => {
+    if (e.target === createTableModal) window.closeCreateTableModal();
+  });
+
 // Format input jumlah with dots for readability (same behavior)
 const jumlahInput = document.getElementById('jumlah');
 if (jumlahInput) {
@@ -1150,7 +1206,7 @@ if (submitBtn) submitBtn.id = 'submitBtn';
 
 // Event listeners for create table
 document.getElementById('createTableBtn').addEventListener('click', () => {
-  document.getElementById('createTableForm').style.display = 'block';
+  createTableModal.classList.add('show');
 });
 
 document.getElementById('saveTableBtn').addEventListener('click', async () => {
@@ -1165,18 +1221,14 @@ document.getElementById('saveTableBtn').addEventListener('click', async () => {
       name,
       createdAt: serverTimestamp()
     });
-    document.getElementById('newTableName').value = '';
-    document.getElementById('createTableForm').style.display = 'none';
+    closeCreateTableModal();
   } catch (err) {
     console.error('Error creating table:', err);
     alert('Gagal membuat tabel.');
   }
 });
 
-document.getElementById('cancelTableBtn').addEventListener('click', () => {
-  document.getElementById('newTableName').value = '';
-  document.getElementById('createTableForm').style.display = 'none';
-});
+
 
 </script>
 
