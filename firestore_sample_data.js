@@ -1,11 +1,17 @@
+/*
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
   getFirestore,
   collection,
   addDoc,
-  writeBatch,
-  serverTimestamp,
-  doc
+  getDocs,
+  onSnapshot,
+  query,          // ✅ tambahin ini
+  where,
+  doc,
+  setDoc,
+  updateDoc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
@@ -45,6 +51,58 @@ async function addTransaction(userId) {
     console.error("Error adding transaction: ", e);
   }
 }
+*/
+
+
+  // Import core Firebase
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
+
+  // 🔹 Import Firestore lengkap
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    onSnapshot,
+    query,        // ✅ WAJIB untuk bikin query
+    where,        // ✅ dipakai untuk filter
+    doc,
+    setDoc,
+    updateDoc,
+    deleteDoc,
+    getDoc
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  // Firebase Config (pastikan storageBucket benar)
+  const firebaseConfig = {
+    apiKey: "AIzaSyA3d0-uYWGob0_Rd4DSr--enC8MaudBmu0",
+    authDomain: "kendalikas-dc227.firebaseapp.com",
+    projectId: "kendalikas-dc227",
+    storageBucket: "kendalikas-dc227.appspot.com",  // ✅ perbaiki jadi appspot.com
+    messagingSenderId: "192223553027",
+    appId: "1:192223553027:web:9922ee5d193226bf42d036",
+    measurementId: "G-PT69WLETYP"
+  };
+
+  // Init Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  console.log("typeof query =", typeof query); // ✅ cek apakah query sudah terimport
+
+  // Contoh fungsi pakai query
+  function subscribeTransactions(tableId) {
+    const transactionsRef = collection(db, "transactions");
+    const q = query(transactionsRef, where("tableId", "==", tableId));
+    onSnapshot(q, (snapshot) => {
+      console.log("Transactions snapshot:", snapshot.docs.map(d => d.data()));
+    });
+  }
+
 
 // Function to add multiple collaborators using batch write
 async function addCollaboratorsBatch(userId) {
