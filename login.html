@@ -97,7 +97,7 @@
       apiKey: "AIzaSyA3d0-uYWGob0_Rd4DSr--enC8MaudBmu0",
       authDomain: "kendalikas-dc227.firebaseapp.com",
       projectId: "kendalikas-dc227",
-      storageBucket: "kendalikas-dc227.firebasestorage.app",
+      storageBucket: "kendalikas-dc227.appspot.com",
       messagingSenderId: "192223553027",
       appId: "1:192223553027:web:9922ee5d193226bf42d036",
       measurementId: "G-PT69WLETYP"
@@ -137,6 +137,7 @@
 
     // Check if user is already signed in
     onAuthStateChanged(auth, (user) => {
+      console.log("onAuthStateChanged triggered, user =", user);
       if (user) {
         // User is signed in, redirect to main app
         window.location.href = 'index.html';

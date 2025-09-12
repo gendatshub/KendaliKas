@@ -551,6 +551,11 @@
 let firebaseLoaded = false;
 let app, auth, db, storage, analytics;
 
+// Declare Firebase functions globally
+let collection, query, onSnapshot, doc, addDoc, updateDoc, deleteDoc, serverTimestamp, getDocs, getDoc, where, orderBy;
+let signOut;
+let ref, uploadBytesResumable, getDownloadURL;
+
 try {
   const firebaseApp = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js");
   const firebaseAuth = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js");
@@ -558,10 +563,11 @@ try {
   const firebaseStorage = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js");
   const firebaseAnalytics = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js");
 
-  // Import specific functions
-  const { collection, query, onSnapshot, doc, addDoc, updateDoc, deleteDoc, serverTimestamp, getDocs, getDoc, where, orderBy } = firebaseFirestore;
-  const { signOut } = firebaseAuth;
-  const { ref, uploadBytesResumable, getDownloadURL } = firebaseStorage;
+  // Assign specific functions
+  ({ collection, query, onSnapshot, doc, addDoc, updateDoc, deleteDoc, serverTimestamp, getDocs, getDoc, where, orderBy } = firebaseFirestore);
+  ({ signOut } = firebaseAuth);
+  ({ ref, uploadBytesResumable, getDownloadURL } = firebaseStorage);
+
 
   /* -----------------------
      2) FIREBASE CONFIG
@@ -570,7 +576,7 @@ try {
     apiKey: "AIzaSyA3d0-uYWGob0_Rd4DSr--enC8MaudBmu0",
     authDomain: "kendalikas-dc227.firebaseapp.com",
     projectId: "kendalikas-dc227",
-    storageBucket: "kendalikas-dc227.firebasestorage.app",
+    storageBucket: "kendalikas-dc227.firebasestorage.com",
     messagingSenderId: "192223553027",
     appId: "1:192223553027:web:9922ee5d193226bf42d036",
     measurementId: "G-PT69WLETYP"
@@ -696,6 +702,10 @@ let editingId = null;     // ketika sedang edit
 
 // subscribe realtime ke koleksi "transactions" untuk user tertentu
 function subscribeTransactions(userId, tableId = null) {
+  if (!query) {
+    console.error("query function is not defined");
+    return;
+  }
   const q = query(collection(db, 'transactions'), where('userId', '==', userId), where('tableId', '==', tableId || currentTableId), orderBy('createdAt', 'desc'));
   onSnapshot(q, (snapshot) => {
     transactionData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
