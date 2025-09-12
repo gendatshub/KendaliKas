@@ -1148,6 +1148,36 @@ document.getElementById('tanggal').valueAsDate = new Date();
 const submitBtn = document.querySelector('#transactionForm button[type="submit"]');
 if (submitBtn) submitBtn.id = 'submitBtn';
 
+// Event listeners for create table
+document.getElementById('createTableBtn').addEventListener('click', () => {
+  document.getElementById('createTableForm').style.display = 'block';
+});
+
+document.getElementById('saveTableBtn').addEventListener('click', async () => {
+  const name = document.getElementById('newTableName').value.trim();
+  if (!name) {
+    alert('Nama tabel tidak boleh kosong.');
+    return;
+  }
+  try {
+    await addDoc(collection(db, 'tables'), {
+      userId: currentUser.uid,
+      name,
+      createdAt: serverTimestamp()
+    });
+    document.getElementById('newTableName').value = '';
+    document.getElementById('createTableForm').style.display = 'none';
+  } catch (err) {
+    console.error('Error creating table:', err);
+    alert('Gagal membuat tabel.');
+  }
+});
+
+document.getElementById('cancelTableBtn').addEventListener('click', () => {
+  document.getElementById('newTableName').value = '';
+  document.getElementById('createTableForm').style.display = 'none';
+});
+
 </script>
 
 
