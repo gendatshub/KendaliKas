@@ -728,6 +728,7 @@ async function migrateTransactions(userId) {
 function displayTables() {
   const tableList = document.getElementById('tableList');
   let html = '';
+  tablesData.sort((a, b) => a.name.localeCompare(b.name));
   tablesData.forEach(table => {
     const isActive = table.id === currentTable;
     html += `
