@@ -843,7 +843,19 @@
           <div id="tableList">
             <!-- Tables will be loaded here -->
           </div>
-          <button id="createTableBtn" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px;">Add Table</button>
+
+          <h2>Make Table</h2>
+          <div id="createTableForm">
+            <input type="text" id="newTableName" placeholder="Table Name" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <button id="saveTableBtn" style="width: 100%; padding: 10px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Save</button>
+          </div>
+
+          <h2>Access Request</h2>
+          <div id="accessRequestForm">
+            <label for="accessTableId" style="display: block; margin-bottom: 5px;">Unique Table ID:</label>
+            <input type="text" id="accessTableId" placeholder="Enter Unique Table ID" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <button id="submitAccessRequest" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Submit Request</button>
+          </div>
         </div>
       </div>
 
