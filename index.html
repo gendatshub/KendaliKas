@@ -28,6 +28,20 @@
       margin-bottom: 16px;
     }
 
+    @media (max-width: 600px) {
+      main {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+    }
+
     section {
       opacity: 0;
       pointer-events: none;
@@ -422,6 +436,19 @@
       align-items: center;
     }
 
+    @media (max-width: 400px) {
+      .search-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+
+      .search-input, .filter-select {
+        width: 100%;
+        max-width: none;
+      }
+    }
+
     .search-input {
       padding: 10px;
       border: 1px solid #ccc;
@@ -496,6 +523,13 @@
       justify-content: center;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       transition: background-color 0.3s ease;
+    }
+
+    @media (max-width: 600px) {
+      .edit-btn, .delete-btn, .info-btn {
+        width: 40px;
+        height: 40px;
+      }
     }
 
     .edit-btn {
