@@ -1,7 +1,4 @@
-- [x] Add new modal div for createTableModal in HTML
-- [x] Move createTableForm into the new modal
-- [x] Update createTableBtn event listener to open new modal
-- [x] Add closeCreateTableModal function
-- [x] Update saveTableBtn to close new modal after saving
-- [x] Update cancelTableBtn to close new modal
-- [x] Add click-outside-to-close for new modal
+- [x] Tambahkan header kolom "Last Edited" di tabel transaksi
+- [x] Perbarui fungsi displayTransactions untuk menyertakan kolom baru dengan timestamp terakhir edit
+- [x] Perbarui fungsi displayFilteredTransactions dengan cara serupa
+- [x] Perbarui colspan pada state kosong dan tidak cocok menjadi 8

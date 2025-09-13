@@ -659,12 +659,13 @@
                 <th>Jenis</th>
                 <th>Jumlah</th>
                 <th>Pengupload</th>
+                <th>Last Edited</th>
                 <th>Aksi</th>
               </tr>
             </thead>
             <tbody id="transactionTableBody">
               <tr>
-                <td colspan="7" style="text-align: center; color: #666;">Belum ada transaksi</td>
+                <td colspan="8" style="text-align: center; color: #666;">Belum ada transaksi</td>
               </tr>
             </tbody>
           </table>
@@ -1118,48 +1119,51 @@ document.getElementById('transactionForm').addEventListener('submit', async func
 /* -----------------------
    9) DISPLAY / FILTER / SUMMARY
    ----------------------- */
-function displayTransactions() {
-  const tbody = document.getElementById('transactionTableBody');
-  if (!transactionData || transactionData.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">Belum ada transaksi</td></tr>';
-    return;
-  }
+    function displayTransactions() {
+      const tbody = document.getElementById('transactionTableBody');
+      if (!transactionData || transactionData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666;">Belum ada transaksi</td></tr>';
+        return;
+      }
 
-  let html = '';
-  transactionData.forEach(transaction => {
-    const formattedDate = transaction.tanggal
-      ? new Date(transaction.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'2-digit', year:'numeric' })
-      : (transaction.createdAt && transaction.createdAt.toDate)
-        ? transaction.createdAt.toDate().toLocaleDateString('id-ID')
-        : '-';
-    const formattedAmount = formatCurrency(transaction.jumlah);
+      let html = '';
+      transactionData.forEach(transaction => {
+        const formattedDate = transaction.tanggal
+          ? new Date(transaction.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'2-digit', year:'numeric' })
+          : (transaction.createdAt && transaction.createdAt.toDate)
+            ? transaction.createdAt.toDate().toLocaleDateString('id-ID')
+            : '-';
+        const formattedAmount = formatCurrency(transaction.jumlah);
+        const lastEdited = transaction.updatedAt || transaction.createdAt;
+        const formattedLastEdited = lastEdited && lastEdited.toDate ? lastEdited.toDate().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) : '-';
 
-    html += `
-      <tr>
-        <td>${formattedDate}</td>
-        <td>${transaction.nama}</td>
-        <td>${transaction.kategori}</td>
-        <td>
-          <span style="color: ${transaction.jenis === 'pemasukan' ? '#4CAF50' : '#f44336'}">
-            ${transaction.jenis === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'}
-          </span>
-        </td>
-        <td class="${transaction.jenis === 'pemasukan' ? 'income-amount' : 'expense-amount'}">
-          ${formattedAmount}
-        </td>
-        <td>${transaction.uploader || 'Unknown'}</td>
-        <td>
-          <div class="action-buttons">
-            <button class="edit-btn" onclick="window.editTransaction('${transaction.id}')">Edit</button>
-            <button class="delete-btn" onclick="window.deleteTransaction('${transaction.id}')">Hapus</button>
-          </div>
-        </td>
-      </tr>
-    `;
-  });
+        html += `
+          <tr>
+            <td>${formattedDate}</td>
+            <td>${transaction.nama}</td>
+            <td>${transaction.kategori}</td>
+            <td>
+              <span style="color: ${transaction.jenis === 'pemasukan' ? '#4CAF50' : '#f44336'}">
+                ${transaction.jenis === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'}
+              </span>
+            </td>
+            <td class="${transaction.jenis === 'pemasukan' ? 'income-amount' : 'expense-amount'}">
+              ${formattedAmount}
+            </td>
+            <td>${transaction.uploader || 'Unknown'}</td>
+            <td>${formattedLastEdited}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="edit-btn" onclick="window.editTransaction('${transaction.id}')">Edit</button>
+                <button class="delete-btn" onclick="window.deleteTransaction('${transaction.id}')">Hapus</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
 
-  tbody.innerHTML = html;
-}
+      tbody.innerHTML = html;
+    }
 
 function filterTransactions() {
   const searchTerm = document.getElementById('searchInput').value.toLowerCase();
@@ -1173,41 +1177,44 @@ function filterTransactions() {
   displayFilteredTransactions(filteredData);
 }
 
-function displayFilteredTransactions(data) {
-  const tbody = document.getElementById('transactionTableBody');
-  if (!data || data.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666;">Tidak ada transaksi yang sesuai</td></tr>';
-    return;
-  }
-  let html = '';
-  data.forEach(transaction => {
-    const formattedDate = transaction.tanggal
-      ? new Date(transaction.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'2-digit', year:'numeric' })
-      : '-';
-    const formattedAmount = formatCurrency(transaction.jumlah);
-    html += `
-      <tr>
-        <td>${formattedDate}</td>
-        <td>${transaction.nama}</td>
-        <td>${transaction.kategori}</td>
-        <td><span style="color: ${transaction.jenis === 'pemasukan' ? '#4CAF50' : '#f44336'}">
-          ${transaction.jenis === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'}
-        </span></td>
-        <td class="${transaction.jenis === 'pemasukan' ? 'income-amount' : 'expense-amount'}">
-          ${formattedAmount}
-        </td>
-        <td>${transaction.uploader || 'Unknown'}</td>
-        <td>
-          <div class="action-buttons">
-            <button class="edit-btn" onclick="window.editTransaction('${transaction.id}')">Edit</button>
-            <button class="delete-btn" onclick="window.deleteTransaction('${transaction.id}')">Hapus</button>
-          </div>
-        </td>
-      </tr>
-    `;
-  });
-  tbody.innerHTML = html;
-}
+    function displayFilteredTransactions(data) {
+      const tbody = document.getElementById('transactionTableBody');
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666;">Tidak ada transaksi yang sesuai</td></tr>';
+        return;
+      }
+      let html = '';
+      data.forEach(transaction => {
+        const formattedDate = transaction.tanggal
+          ? new Date(transaction.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'2-digit', year:'numeric' })
+          : '-';
+        const formattedAmount = formatCurrency(transaction.jumlah);
+        const lastEdited = transaction.updatedAt || transaction.createdAt;
+        const formattedLastEdited = lastEdited && lastEdited.toDate ? lastEdited.toDate().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) : '-';
+        html += `
+          <tr>
+            <td>${formattedDate}</td>
+            <td>${transaction.nama}</td>
+            <td>${transaction.kategori}</td>
+            <td><span style="color: ${transaction.jenis === 'pemasukan' ? '#4CAF50' : '#f44336'}">
+              ${transaction.jenis === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'}
+            </span></td>
+            <td class="${transaction.jenis === 'pemasukan' ? 'income-amount' : 'expense-amount'}">
+              ${formattedAmount}
+            </td>
+            <td>${transaction.uploader || 'Unknown'}</td>
+            <td>${formattedLastEdited}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="edit-btn" onclick="window.editTransaction('${transaction.id}')">Edit</button>
+                <button class="delete-btn" onclick="window.deleteTransaction('${transaction.id}')">Hapus</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
 
 function updateSummary() {
   const totalIncome = transactionData
