@@ -434,19 +434,12 @@
       display: flex;
       gap: 3px;
       align-items: center;
+      flex-wrap: nowrap;
     }
 
     @media (max-width: 400px) {
       .search-container {
         gap: 5px;
-      }
-
-      .search-input {
-        max-width: 60px;
-      }
-
-      .filter-select {
-        max-width: 80px;
       }
     }
 
@@ -455,19 +448,16 @@
       border: 1px solid #ccc;
       border-radius: 4px;
       flex: 1;
-      max-width: 100px;
-    }
-
-    @media (max-width: 768px) {
-      .search-input {
-        max-width: 80px;
-      }
+      min-width: 100px;
     }
 
     .filter-select {
       padding: 6px;
       border: 1px solid #ccc;
       border-radius: 4px;
+      flex: 1;
+      min-width: 120px;
+      max-width: 150px;
     }
 
     .summary-cards {
