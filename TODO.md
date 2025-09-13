@@ -1,7 +1,5 @@
-- [x] Add <th>Division</th> and <th>Payment Method</th> to the table header
-- [x] Update colspan in no data row from 8 to 10
-- [x] Add input fields for Division and Payment Method in the transaction form
-- [x] Update the submit event to include division and paymentMethod in Firestore payload
-- [x] Update displayTransactions function to include <td> for division and paymentMethod
-- [x] Update displayFilteredTransactions function similarly
-- [x] Update editTransaction function to populate the new fields
+- [x] Add "Info" button to action column in transaction table
+- [x] Create modal for "More Information" popup
+- [x] Add CSS for info button and modal
+- [x] Add JavaScript function to show the modal
+- [x] Test the button and modal functionality
