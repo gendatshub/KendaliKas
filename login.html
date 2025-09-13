@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -74,11 +74,11 @@
 <body>
   <div class="login-container">
     <h1>KendaliKas</h1>
-    <p>Masuk untuk mengelola keuangan Anda</p>
+    <p>Log in to manage your finances</p>
 
     <button id="googleSignInBtn" class="google-btn">
       <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google">
-      Masuk dengan Google
+      Sign in with Google
     </button>
 
     <div id="loading" class="loading">Memproses...</div>
@@ -129,7 +129,7 @@
 
       } catch (error) {
         console.error('Sign in error:', error);
-        errorDiv.textContent = 'Gagal masuk. Silakan coba lagi.';
+        errorDiv.textContent = 'Failed to sign in. Please try again.';
         loading.style.display = 'none';
         googleSignInBtn.disabled = false;
       }
