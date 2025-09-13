@@ -772,7 +772,9 @@
         <div>
           <button class="close-btn" onclick="closeExportImportMenu()">×</button>
           <h1>Export-Import Menu</h1>
-          <button id="exportExcelBtn" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Export to Excel</button>
+          <button id="exportExcelBtn" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">Export to Excel</button>
+          <input type="file" id="importExcelFile" accept=".xlsx,.xls" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px;">
+          <button id="importExcelBtn" style="width: 100%; padding: 10px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Import from Excel</button>
         </div>
       </div>
 
@@ -1550,6 +1552,127 @@ document.getElementById('exportExcelBtn').addEventListener('click', () => {
   XLSX.utils.book_append_sheet(wb, ws, 'Transactions');
   XLSX.writeFile(wb, 'transactions.xlsx');
 });
+
+// Import from Excel
+document.getElementById('importExcelBtn').addEventListener('click', async () => {
+  const fileInput = document.getElementById('importExcelFile');
+  const file = fileInput.files[0];
+  if (!file) {
+    alert('Please select an Excel file to import.');
+    return;
+  }
+  try {
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data);
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    if (jsonData.length < 2) {
+      alert('The Excel file must have at least a header row and one data row.');
+      return;
+    }
+    const headers = jsonData[0];
+    const expectedHeaders = ['Date', 'Transaction Name', 'Category', 'Division', 'Payment Method', 'Type', 'Amount'];
+    const headerMap = {};
+    expectedHeaders.forEach((h, i) => {
+      const idx = headers.indexOf(h);
+      if (idx !== -1) headerMap[h] = idx;
+    });
+    if (!headerMap['Date'] || !headerMap['Transaction Name'] || !headerMap['Type'] || !headerMap['Amount']) {
+      alert('The Excel file must contain columns: Date, Transaction Name, Type, Amount.');
+      return;
+    }
+    const transactionsToAdd = [];
+    const errors = [];
+    for (let i = 1; i < jsonData.length; i++) {
+      const row = jsonData[i];
+      const dateStr = row[headerMap['Date']];
+      const nama = row[headerMap['Transaction Name']];
+      const kategori = row[headerMap['Category']] || 'Umum';
+      const division = row[headerMap['Division']] || '';
+      const paymentMethod = row[headerMap['Payment Method']] || '';
+      const typeStr = row[headerMap['Type']];
+      const amount = row[headerMap['Amount']];
+      if (!nama || !typeStr || amount == null) {
+        errors.push(`Row ${i + 1}: Missing required fields (Transaction Name, Type, Amount).`);
+        continue;
+      }
+      let jenis;
+      if (typeStr.toLowerCase() === 'income') {
+        jenis = 'pemasukan';
+      } else if (typeStr.toLowerCase() === 'expense') {
+        jenis = 'pengeluaran';
+      } else {
+        errors.push(`Row ${i + 1}: Invalid Type '${typeStr}'. Must be 'Income' or 'Expense'.`);
+        continue;
+      }
+      const jumlah = Number(amount);
+      if (isNaN(jumlah)) {
+        errors.push(`Row ${i + 1}: Invalid Amount '${amount}'. Must be a number.`);
+        continue;
+      }
+      let tanggal;
+      if (dateStr) {
+        const parsed = parseDate(dateStr);
+        if (!parsed) {
+          errors.push(`Row ${i + 1}: Invalid Date '${dateStr}'. Expected format DD/MM/YYYY.`);
+          continue;
+        }
+        tanggal = parsed;
+      } else {
+        errors.push(`Row ${i + 1}: Missing Date.`);
+        continue;
+      }
+      transactionsToAdd.push({
+        nama: nama.toString().trim(),
+        kategori: kategori.toString().trim(),
+        division: division.toString().trim(),
+        paymentMethod: paymentMethod.toString().trim(),
+        jenis,
+        jumlah,
+        tanggal,
+        userId: currentUser.uid,
+        tableId: currentTable,
+        uploader: currentUser.email || currentUser.displayName || 'Unknown',
+        createdAt: serverTimestamp()
+      });
+    }
+    if (errors.length > 0) {
+      alert('Import failed due to errors:\n' + errors.join('\n'));
+      return;
+    }
+    if (transactionsToAdd.length === 0) {
+      alert('No valid transactions to import.');
+      return;
+    }
+    // Batch add
+    const batch = writeBatch(db);
+    transactionsToAdd.forEach(t => {
+      const docRef = doc(collection(db, 'transactions'));
+      batch.set(docRef, t);
+    });
+    await batch.commit();
+    alert(`Successfully imported ${transactionsToAdd.length} transactions.`);
+    fileInput.value = ''; // reset file input
+  } catch (err) {
+    console.error('Import error:', err);
+    alert('Failed to import Excel file. Please check the file format.');
+  }
+});
+
+// Helper function to parse date in DD/MM/YYYY format
+function parseDate(dateStr) {
+  if (typeof dateStr === 'number') {
+    // Excel date serial number
+    const date = XLSX.utils.format_cell({ t: 'n', v: dateStr, w: '' }, { dateNF: 'DD/MM/YYYY' });
+    return date ? new Date(date.split('/').reverse().join('-')).toISOString().split('T')[0] : null;
+  }
+  const parts = dateStr.toString().split('/');
+  if (parts.length !== 3) return null;
+  const [dd, mm, yyyy] = parts;
+  const date = new Date(`${yyyy}-${mm}-${dd}`);
+  return date.toISOString().split('T')[0];
+}
 
 
 
