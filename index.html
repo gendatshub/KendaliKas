@@ -1004,7 +1004,7 @@ function subscribeTransactions(userId, tableId) {
     updateSummary();
     const table = tablesData.find(t => t.id === tableId);
     if (table) {
-      document.getElementById('dataTransaksiHeader').textContent = `Data Transaksi - ${table.name}`;
+      document.getElementById('dataTransaksiHeader').textContent = `Tansaction Data - ${table.name}`;
     }
   }, (err) => {
     console.error("Error onSnapshot:", err);
