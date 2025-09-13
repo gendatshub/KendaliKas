@@ -284,6 +284,102 @@
       position: relative;
     }
 
+    .export-import-section {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .export-import-section h2 {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .export-import-section h2 svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .export-btn, .import-btn {
+      width: auto;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background-color 0.3s ease;
+    }
+
+    .export-btn {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .export-btn:hover {
+      background-color: #45a049;
+    }
+
+    .import-btn {
+      background-color: #2196F3;
+      color: white;
+    }
+
+    .import-btn:hover {
+      background-color: #1976d2;
+    }
+
+    .drag-drop-area {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.3s ease, background-color 0.3s ease;
+      background-color: #f9f9f9;
+      margin-bottom: 10px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .drag-drop-area:hover, .drag-drop-area.dragover {
+      border-color: #2196F3;
+      background-color: #e3f2fd;
+    }
+
+    .drag-drop-area p {
+      margin: 0;
+      font-size: 16px;
+      color: #666;
+    }
+
+    .drag-drop-area svg {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 10px;
+      color: #ccc;
+    }
+
+    .drag-drop-area.dragover svg {
+      color: #2196F3;
+    }
+
+    .file-input-hidden {
+      display: none;
+    }
+
     /* Modal for Create Table */
     #createTableModal {
       position: fixed;
@@ -772,9 +868,43 @@
         <div>
           <button class="close-btn" onclick="closeExportImportMenu()">×</button>
           <h1>Export-Import Menu</h1>
-          <button id="exportExcelBtn" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">Export to Excel</button>
-          <input type="file" id="importExcelFile" accept=".xlsx,.xls" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px;">
-          <button id="importExcelBtn" style="width: 100%; padding: 10px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Import from Excel</button>
+
+          <div class="export-import-section">
+            <h2>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+              </svg>
+              Export Data
+            </h2>
+            <button id="exportExcelBtn" class="export-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12.9,14.5L15.8,19H14L12,15.6L10,19H8.2L11.1,14.5L9.3,11H11L12,13.4L13,11H14.7L12.9,14.5Z"/>
+              </svg>
+              Export to Excel
+            </button>
+          </div>
+
+          <div class="export-import-section">
+            <h2>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+              </svg>
+              Import Data
+            </h2>
+            <div class="drag-drop-area" id="dragDropArea">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12,12L8,16H11V22H13V16H16L12,12Z"/>
+              </svg>
+              <p>Drag and drop your Excel file here or click to select</p>
+            </div>
+            <input type="file" id="importExcelFile" accept=".xlsx,.xls" class="file-input-hidden">
+            <button id="importExcelBtn" class="import-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+              </svg>
+              Import from Excel
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1553,9 +1683,44 @@ document.getElementById('exportExcelBtn').addEventListener('click', () => {
   XLSX.writeFile(wb, 'transactions.xlsx');
 });
 
+// Drag and Drop functionality
+const dragDropArea = document.getElementById('dragDropArea');
+const fileInput = document.getElementById('importExcelFile');
+
+dragDropArea.addEventListener('click', () => {
+  fileInput.click();
+});
+
+dragDropArea.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dragDropArea.classList.add('dragover');
+});
+
+dragDropArea.addEventListener('dragleave', () => {
+  dragDropArea.classList.remove('dragover');
+});
+
+dragDropArea.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dragDropArea.classList.remove('dragover');
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    fileInput.files = files;
+    // Optionally, trigger import immediately or show file name
+    dragDropArea.querySelector('p').textContent = `File selected: ${files[0].name}`;
+  }
+});
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length > 0) {
+    dragDropArea.querySelector('p').textContent = `File selected: ${fileInput.files[0].name}`;
+  } else {
+    dragDropArea.querySelector('p').textContent = 'Drag and drop your Excel file here or click to select';
+  }
+});
+
 // Import from Excel
 document.getElementById('importExcelBtn').addEventListener('click', async () => {
-  const fileInput = document.getElementById('importExcelFile');
   const file = fileInput.files[0];
   if (!file) {
     alert('Please select an Excel file to import.');
