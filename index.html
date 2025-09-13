@@ -201,7 +201,7 @@
       background: white;
       padding: 20px;
       border-radius: 8px;
-      max-width: 400px;
+      max-width: 320px;
       width: 90%;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       position: relative;
@@ -239,7 +239,7 @@
       background: white;
       padding: 20px;
       border-radius: 8px;
-      max-width: 400px;
+      max-width: 320px;
       width: 90%;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       position: relative;
@@ -277,7 +277,7 @@
       background: white;
       padding: 20px;
       border-radius: 8px;
-      max-width: 400px;
+      max-width: 320px;
       width: 90%;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       position: relative;
@@ -315,7 +315,7 @@
       background: white;
       padding: 20px;
       border-radius: 8px;
-      max-width: 400px;
+      max-width: 320px;
       width: 90%;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       position: relative;
@@ -713,10 +713,10 @@
       <div id="createTableModal">
         <div>
           <button class="close-btn" onclick="closeCreateTableModal()">×</button>
-          <h1>Tambah Tabel</h1>
+          <h1>Add Table</h1>
           <div id="createTableForm">
-            <input type="text" id="newTableName" placeholder="Nama Tabel" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
-            <button id="saveTableBtn" style="width: 100%; padding: 10px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Simpan</button>
+            <input type="text" id="newTableName" placeholder="Table Name" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <button id="saveTableBtn" style="width: 100%; padding: 10px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Save</button>
           </div>
         </div>
       </div>
@@ -906,7 +906,7 @@ function displayTables() {
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px; background: ${isActive ? '#e3f2fd' : 'white'}; ${!isActive ? 'cursor: pointer;' : ''}" ${!isActive ? `onclick="switchTable('${table.id}')"` : ''}>
         <span>${table.name}</span>
         <div>
-          <button onclick="event.stopPropagation(); openDeleteTableModal('${table.id}')" style="padding: 6px; background: #4a90e2; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 5px; display: flex; align-items: center; justify-content: center;" title="Info Selengkapnya">
+          <button onclick="event.stopPropagation(); openDeleteTableModal('${table.id}')" style="padding: 6px; background: #4a90e2; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 5px; display: flex; align-items: center; justify-content: center;" title="More Info">
             <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="currentColor">
               <circle cx="12" cy="7" r="2"/>
               <circle cx="12" cy="12" r="2"/>
@@ -946,7 +946,7 @@ window.deleteTable = async function(tableId) {
     await deleteDoc(doc(db, 'tables', tableId));
   } catch (err) {
     console.error('Error deleting table:', err);
-    alert('Gagal menghapus tabel.');
+    alert('Failed to delete table.');
   }
 }
 const auth = getAuth(app);
@@ -1437,7 +1437,7 @@ document.getElementById('createTableBtn').addEventListener('click', () => {
 document.getElementById('saveTableBtn').addEventListener('click', async () => {
   const name = document.getElementById('newTableName').value.trim();
   if (!name) {
-    alert('Nama tabel tidak boleh kosong.');
+    alert('Table name cannot be empty.');
     return;
   }
   try {
@@ -1449,7 +1449,7 @@ document.getElementById('saveTableBtn').addEventListener('click', async () => {
     closeCreateTableModal();
   } catch (err) {
     console.error('Error creating table:', err);
-    alert('Gagal membuat tabel.');
+    alert('Failed to create table.');
   }
 });
 
