@@ -739,14 +739,12 @@
               <th>Payment Method</th>
               <th>Type</th>
               <th>Amount</th>
-              <th>Uploader</th>
-              <th>Last Edited</th>
               <th>Actions</th>
               </tr>
             </thead>
             <tbody id="transactionTableBody">
               <tr>
-                <td colspan="10" style="text-align: center; color: #666;">No transactions yet</td>
+                <td colspan="8" style="text-align: center; color: #666;">No transactions yet</td>
               </tr>
             </tbody>
           </table>
@@ -1065,6 +1063,7 @@ if (jumlahInput) {
    5) DATA LAYER (Firestore)
    ----------------------- */
 let transactionData = []; // diisi dari Firestore
+window.transactionData = transactionData; // make accessible globally
 let editingId = null;     // ketika sedang edit
 
 // subscribe realtime ke koleksi "transactions" untuk user tertentu dan tabel tertentu
@@ -1072,6 +1071,7 @@ function subscribeTransactions(userId, tableId) {
   const q = query(collection(db, 'transactions'), where('userId', '==', userId), where('tableId', '==', tableId), orderBy('createdAt', 'desc'));
   onSnapshot(q, (snapshot) => {
     transactionData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    window.transactionData = transactionData; // update global reference
     // Pastikan field tanggal tersimpan sebagai 'YYYY-MM-DD' saat input agar mudah parse
     displayTransactions();
     updateSummary();
@@ -1244,8 +1244,6 @@ document.getElementById('transactionForm').addEventListener('submit', async func
         <td class="${transaction.jenis === 'pemasukan' ? 'income-amount' : 'expense-amount'}">
           ${formattedAmount}
         </td>
-        <td>${transaction.uploader || 'Unknown'}</td>
-        <td>${formattedLastEdited}</td>
         <td>
           <div class="action-buttons">
             <button class="info-btn" onclick="showMoreInfo('${transaction.id}')" title="More Information" aria-label="More Information">
@@ -1305,14 +1303,16 @@ function filterTransactions() {
             <td>${formattedDate}</td>
             <td>${transaction.nama}</td>
             <td>${transaction.kategori}</td>
-            <td><span style="color: ${transaction.jenis === 'pemasukan' ? '#4CAF50' : '#f44336'}">
-              ${transaction.jenis === 'pemasukan' ? 'Income' : 'Expense'}
-            </span></td>
+            <td>${transaction.division || '-'}</td>
+            <td>${transaction.paymentMethod || '-'}</td>
+            <td>
+              <span style="color: ${transaction.jenis === 'pemasukan' ? '#4CAF50' : '#f44336'}">
+                ${transaction.jenis === 'pemasukan' ? 'Income' : 'Expense'}
+              </span>
+            </td>
             <td class="${transaction.jenis === 'pemasukan' ? 'income-amount' : 'expense-amount'}">
               ${formattedAmount}
             </td>
-            <td>${transaction.uploader || 'Unknown'}</td>
-            <td>${formattedLastEdited}</td>
             <td>
               <div class="action-buttons">
                 <button class="info-btn" onclick="showMoreInfo('${transaction.id}')" title="More Information" aria-label="More Information">
@@ -1452,7 +1452,20 @@ document.getElementById('confirmDeleteTableBtn').addEventListener('click', async
 <script>
   function showMoreInfo(transactionId) {
     const modal = document.getElementById('moreInfoModal');
-    // For now, content is empty as requested
+    const transaction = transactionData.find(t => t.id === transactionId);
+    if (!transaction) return;
+    const lastEdited = transaction.updatedAt || transaction.createdAt;
+    const formattedLastEdited = lastEdited && lastEdited.toDate ? lastEdited.toDate().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) : '-';
+    const content = `
+      <p><strong>Uploader:</strong> ${transaction.uploader || 'Unknown'}</p>
+      <p><strong>Last Edited:</strong> ${formattedLastEdited}</p>
+    `;
+    const modalContent = modal.querySelector('div');
+    modalContent.innerHTML = `
+      <button class="close-btn" onclick="closeMoreInfoModal()">×</button>
+      <h1>More Information</h1>
+      ${content}
+    `;
     modal.classList.add('show');
   }
 
