@@ -1,11 +1,7 @@
-- [x] Tambahkan header kolom "Last Edited" di tabel transaksi
-- [x] Perbarui fungsi displayTransactions untuk menyertakan kolom baru dengan timestamp terakhir edit
-- [x] Perbarui fungsi displayFilteredTransactions dengan cara serupa
-- [x] Perbarui colspan pada state kosong dan tidak cocok menjadi 8
-- [x] Tambahkan section baru: Analytics
-- [ ] Change lang attribute from "id" to "en" in both HTML files
-- [ ] Translate all HTML text content in index.html
-- [ ] Translate all HTML text content in login.html
-- [ ] Translate all JavaScript string literals and alerts in index.html
-- [ ] Update placeholders and labels
-- [ ] Test that functionality remains intact after translations
+- [x] Add <th>Division</th> and <th>Payment Method</th> to the table header
+- [x] Update colspan in no data row from 8 to 10
+- [x] Add input fields for Division and Payment Method in the transaction form
+- [x] Update the submit event to include division and paymentMethod in Firestore payload
+- [x] Update displayTransactions function to include <td> for division and paymentMethod
+- [x] Update displayFilteredTransactions function similarly
+- [x] Update editTransaction function to populate the new fields

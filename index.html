@@ -559,6 +559,16 @@
             </div>
 
             <div style="margin-bottom: 15px;">
+              <label for="division">Division:</label><br>
+              <input type="text" id="division" name="division" placeholder="Example: Sales, HR" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+
+            <div style="margin-bottom: 15px;">
+              <label for="paymentMethod">Payment Method:</label><br>
+              <input type="text" id="paymentMethod" name="paymentMethod" placeholder="Example: Cash, Credit Card" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+
+            <div style="margin-bottom: 15px;">
               <label for="jenis">Transaction Type:</label><br>
               <select id="jenis" name="jenis" required style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
                 <option value="">Select type</option>
@@ -661,19 +671,21 @@
           <table class="transaction-table" id="transactionTable">
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Transaction Name</th>
-                <th>Category</th>
-                <th>Type</th>
-                <th>Amount</th>
-                <th>Uploader</th>
-                <th>Last Edited</th>
-                <th>Actions</th>
+              <th>Date</th>
+              <th>Transaction Name</th>
+              <th>Category</th>
+              <th>Division</th>
+              <th>Payment Method</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Uploader</th>
+              <th>Last Edited</th>
+              <th>Actions</th>
               </tr>
             </thead>
             <tbody id="transactionTableBody">
               <tr>
-                <td colspan="8" style="text-align: center; color: #666;">No transactions yet</td>
+                <td colspan="10" style="text-align: center; color: #666;">No transactions yet</td>
               </tr>
             </tbody>
           </table>
@@ -1089,6 +1101,8 @@ async function uploadProofFile(file) {
 document.getElementById('transactionForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   const nama = document.getElementById('nama').value.trim();
+  const division = document.getElementById('division').value.trim();
+  const paymentMethod = document.getElementById('paymentMethod').value.trim();
   const jenis = document.getElementById('jenis').value;
   const jumlahRaw = document.getElementById('jumlah').value.replace(/\./g, '');
   const jumlah = Number(jumlahRaw) || 0;
@@ -1107,7 +1121,7 @@ document.getElementById('transactionForm').addEventListener('submit', async func
       // update
       const refDoc = doc(db, 'transactions', editingId);
       const payload = {
-        nama, jenis, jumlah, tanggal, kategori,
+        nama, division, paymentMethod, jenis, jumlah, tanggal, kategori,
         proofUrl: proofUrl || null,
         userId: currentUser.uid,
         uploader: currentUser.email || currentUser.displayName || 'Unknown',
@@ -1117,7 +1131,7 @@ document.getElementById('transactionForm').addEventListener('submit', async func
     } else {
       // create
       await addDoc(collection(db, 'transactions'), {
-        nama, jenis, jumlah, tanggal, kategori,
+        nama, division, paymentMethod, jenis, jumlah, tanggal, kategori,
         proofUrl: proofUrl || null,
         userId: currentUser.uid,
         tableId: currentTable,
@@ -1157,24 +1171,26 @@ document.getElementById('transactionForm').addEventListener('submit', async func
         html += `
           <tr>
             <td>${formattedDate}</td>
-            <td>${transaction.nama}</td>
-            <td>${transaction.kategori}</td>
-            <td>
-              <span style="color: ${transaction.jenis === 'pemasukan' ? '#4CAF50' : '#f44336'}">
-                ${transaction.jenis === 'pemasukan' ? 'Income' : 'Expense'}
-              </span>
-            </td>
-            <td class="${transaction.jenis === 'pemasukan' ? 'income-amount' : 'expense-amount'}">
-              ${formattedAmount}
-            </td>
-            <td>${transaction.uploader || 'Unknown'}</td>
-            <td>${formattedLastEdited}</td>
-            <td>
-              <div class="action-buttons">
-                <button class="edit-btn" onclick="window.editTransaction('${transaction.id}')">Edit</button>
-                <button class="delete-btn" onclick="window.deleteTransaction('${transaction.id}')">Delete</button>
-              </div>
-            </td>
+        <td>${transaction.nama}</td>
+        <td>${transaction.kategori}</td>
+        <td>${transaction.division || '-'}</td>
+        <td>${transaction.paymentMethod || '-'}</td>
+        <td>
+          <span style="color: ${transaction.jenis === 'pemasukan' ? '#4CAF50' : '#f44336'}">
+            ${transaction.jenis === 'pemasukan' ? 'Income' : 'Expense'}
+          </span>
+        </td>
+        <td class="${transaction.jenis === 'pemasukan' ? 'income-amount' : 'expense-amount'}">
+          ${formattedAmount}
+        </td>
+        <td>${transaction.uploader || 'Unknown'}</td>
+        <td>${formattedLastEdited}</td>
+        <td>
+          <div class="action-buttons">
+            <button class="edit-btn" onclick="window.editTransaction('${transaction.id}')">Edit</button>
+            <button class="delete-btn" onclick="window.deleteTransaction('${transaction.id}')">Delete</button>
+          </div>
+        </td>
           </tr>
         `;
       });
@@ -1266,6 +1282,8 @@ window.editTransaction = function(id) {
   const transaction = transactionData.find(t => t.id === id);
   if (!transaction) return;
   document.getElementById('nama').value = transaction.nama || '';
+  document.getElementById('division').value = transaction.division || '';
+  document.getElementById('paymentMethod').value = transaction.paymentMethod || '';
   document.getElementById('jenis').value = transaction.jenis || '';
   document.getElementById('jumlah').value = formatInputValue(transaction.jumlah || 0);
   document.getElementById('tanggal').value = transaction.tanggal || '';
