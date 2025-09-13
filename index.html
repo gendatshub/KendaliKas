@@ -747,12 +747,12 @@
             <option value="pemasukan">Income</option>
             <option value="pengeluaran">Expense</option>
           </select>
-          <button id="btnCollaborator" class="icon-button circle" aria-label="Menu Collaborator" title="Menu Collaborator" type="button" tabindex="0" style="margin-left: auto;">
+          <button id="btnCollaborator" class="icon-button circle" aria-label="Menu Collaborator" title="Collaborator Menu" type="button" tabindex="0" style="margin-left: auto;">
             <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
           </button>
-          <button id="btnTable" class="icon-button square" aria-label="Menu Tabel" title="Menu Tabel" type="button" tabindex="0">
+          <button id="btnTable" class="icon-button square" aria-label="Menu Tabel" title="Table Menu" type="button" tabindex="0">
             <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M3 3h18v18H3V3zm2 2v4h4V5H5zm6 0v4h4V5h-4zm6 0v4h-4V5h4zM5 11v4h4v-4H5zm6 0v4h4v-4h-4zm6 0v4h-4v-4h4zM5 17v2h14v-2H5z"/>
             </svg>
@@ -798,13 +798,6 @@
       </div>
     </section>
 
-    <section id="analytics">
-      <div style="padding: 20px;">
-        <h1>Analytics</h1>
-        <p>Analisis data keuangan Anda akan ditampilkan di sini.</p>
-        <!-- Placeholder for charts or additional analytics -->
-      </div>
-    </section>
   </main>
 
   <nav>
@@ -1108,7 +1101,7 @@ function subscribeTransactions(userId, tableId) {
     updateSummary();
     const table = tablesData.find(t => t.id === tableId);
     if (table) {
-      document.getElementById('dataTransaksiHeader').textContent = `Tansaction Data - ${table.name}`;
+      document.getElementById('dataTransaksiHeader').textContent = `Transaction Data - ${table.name}`;
     }
   }, (err) => {
     console.error("Error onSnapshot:", err);
