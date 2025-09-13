@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KendaliKas</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body {
       margin: 0;
@@ -771,7 +772,7 @@
         <div>
           <button class="close-btn" onclick="closeExportImportMenu()">×</button>
           <h1>Export-Import Menu</h1>
-          <!-- Content will be added later -->
+          <button id="exportExcelBtn" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Export to Excel</button>
         </div>
       </div>
 
@@ -1531,6 +1532,23 @@ document.getElementById('confirmDeleteTableBtn').addEventListener('click', async
   const tableId = document.getElementById('deleteTableId').textContent;
   await deleteTable(tableId);
   closeDeleteTableModal();
+});
+
+// Export to Excel
+document.getElementById('exportExcelBtn').addEventListener('click', () => {
+  const data = transactionData.map(t => ({
+    Date: t.tanggal ? new Date(t.tanggal).toLocaleDateString('id-ID') : '',
+    'Transaction Name': t.nama,
+    Category: t.kategori,
+    Division: t.division || '',
+    'Payment Method': t.paymentMethod || '',
+    Type: t.jenis === 'pemasukan' ? 'Income' : 'Expense',
+    Amount: t.jumlah
+  }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Transactions');
+  XLSX.writeFile(wb, 'transactions.xlsx');
 });
 
 
