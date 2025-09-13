@@ -1572,13 +1572,16 @@ document.getElementById('importExcelBtn').addEventListener('click', async () => 
       return;
     }
     const headers = jsonData[0];
+    console.log('Headers in Excel file:', headers);
     const expectedHeaders = ['Date', 'Transaction Name', 'Category', 'Division', 'Payment Method', 'Type', 'Amount'];
+    console.log('Expected headers:', expectedHeaders);
     const headerMap = {};
-    expectedHeaders.forEach((h, i) => {
-      const idx = headers.indexOf(h);
+    expectedHeaders.forEach(h => {
+      const idx = headers.findIndex(hh => hh && typeof hh === 'string' && hh.toLowerCase().trim() === h.toLowerCase().trim());
       if (idx !== -1) headerMap[h] = idx;
     });
-    if (!headerMap['Date'] || !headerMap['Transaction Name'] || !headerMap['Type'] || !headerMap['Amount']) {
+    console.log('Header map:', headerMap);
+    if (headerMap['Date'] === undefined || headerMap['Transaction Name'] === undefined || headerMap['Type'] === undefined || headerMap['Amount'] === undefined) {
       alert('The Excel file must contain columns: Date, Transaction Name, Type, Amount.');
       return;
     }
@@ -1598,12 +1601,13 @@ document.getElementById('importExcelBtn').addEventListener('click', async () => 
         continue;
       }
       let jenis;
-      if (typeStr.toLowerCase() === 'income') {
+      const typeLower = typeStr.toLowerCase();
+      if (typeLower === 'income' || typeLower === 'pemasukan') {
         jenis = 'pemasukan';
-      } else if (typeStr.toLowerCase() === 'expense') {
+      } else if (typeLower === 'expense' || typeLower === 'pengeluaran') {
         jenis = 'pengeluaran';
       } else {
-        errors.push(`Row ${i + 1}: Invalid Type '${typeStr}'. Must be 'Income' or 'Expense'.`);
+        errors.push(`Row ${i + 1}: Invalid Type '${typeStr}'. Must be 'Income', 'Expense', 'Pemasukan', or 'Pengeluaran'.`);
         continue;
       }
       const jumlah = Number(amount);
@@ -1660,18 +1664,42 @@ document.getElementById('importExcelBtn').addEventListener('click', async () => 
   }
 });
 
-// Helper function to parse date in DD/MM/YYYY format
+// Helper function to parse date in various formats
 function parseDate(dateStr) {
   if (typeof dateStr === 'number') {
     // Excel date serial number
     const date = XLSX.utils.format_cell({ t: 'n', v: dateStr, w: '' }, { dateNF: 'DD/MM/YYYY' });
     return date ? new Date(date.split('/').reverse().join('-')).toISOString().split('T')[0] : null;
   }
-  const parts = dateStr.toString().split('/');
-  if (parts.length !== 3) return null;
-  const [dd, mm, yyyy] = parts;
-  const date = new Date(`${yyyy}-${mm}-${dd}`);
-  return date.toISOString().split('T')[0];
+  const str = dateStr.toString().trim();
+  // Try DD/MM/YYYY (allow day and month length 1 or 2)
+  let parts = str.split('/');
+  if (parts.length === 3) {
+    const [dd, mm, yyyy] = parts;
+    if ((dd.length === 1 || dd.length === 2) && (mm.length === 1 || mm.length === 2) && yyyy.length === 4) {
+      const date = new Date(`${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`);
+      if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
+    }
+  }
+  // Try YYYY-MM-DD
+  parts = str.split('-');
+  if (parts.length === 3) {
+    const [yyyy, mm, dd] = parts;
+    if (yyyy.length === 4 && mm.length === 2 && dd.length === 2) {
+      const date = new Date(str);
+      if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
+    }
+  }
+  // Try MM/DD/YYYY
+  parts = str.split('/');
+  if (parts.length === 3) {
+    const [mm, dd, yyyy] = parts;
+    if (mm.length <= 2 && dd.length <= 2 && yyyy.length === 4) {
+      const date = new Date(`${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`);
+      if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
+    }
+  }
+  return null;
 }
 
 
