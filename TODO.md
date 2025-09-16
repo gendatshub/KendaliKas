@@ -1,10 +1,11 @@
-# TODO: Improve Export-Import Menu
+# TODO: Remove Division and Payment Method Fields and Features
 
-- [x] Restructure #menuExportImport modal into Export and Import sections
-- [x] Add icons to Export and Import buttons
-- [x] Replace file input with drag-and-drop area for import
-- [x] Add CSS styling for drag-drop area and improved modal layout
-- [x] Update JavaScript to handle drag-and-drop events
-- [x] Test drag-drop functionality
-- [x] Make modal slimmer like other popups (320px max-width)
-- [x] Make export and import buttons smaller
+- [ ] Remove "Division" and "Payment Method" input fields from the transaction form in index.html
+- [ ] Remove "Division" and "Payment Method" columns from the transaction table header
+- [ ] Update colspan in empty table message from 8 to 6
+- [ ] Remove division and paymentMethod <td> elements from displayTransactions and displayFilteredTransactions functions
+- [ ] Remove division and paymentMethod from transaction payload in add/update JavaScript code
+- [ ] Remove division and paymentMethod population in editTransaction function
+- [ ] Remove Division and Payment Method from export Excel data mapping
+- [ ] Remove Division and Payment Method from import Excel expected headers, headerMap, and transaction object
+- [ ] Test the app to ensure no errors and functionality works without these fields
