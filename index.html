@@ -798,7 +798,7 @@
       <div id="menutambahdata">
         <div>
           <button class="close-btn" onclick="closeMenu()">×</button>
-          <h1>Add Transaction Data</h1>
+          <h1 id="modalTitle">Add Transaction Data</h1>
           <form id="transactionForm">
             <div style="margin-bottom: 15px;">
               <label for="nama">Transaction Name:</label><br>
@@ -1231,6 +1231,7 @@ links.forEach(link => {
     document.getElementById('transactionForm').reset();
     editingId = null;
     document.getElementById('submitBtn').textContent = 'Simpan Transaksi';
+    document.getElementById('modalTitle').textContent = 'Add Transaction Data';
   };
   menuTambahData.addEventListener('click', (e) => {
     if (e.target === menuTambahData) window.closeMenu();
@@ -1585,6 +1586,7 @@ window.editTransaction = function(id) {
   document.getElementById('kategori').value = transaction.kategori || '';
   editingId = id;
   document.getElementById('submitBtn').textContent = 'Perbarui Transaksi';
+  document.getElementById('modalTitle').textContent = 'Edit Transaction Data';
   menuTambahData.classList.add('show');
 };
 
