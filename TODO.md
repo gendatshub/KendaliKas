@@ -1,11 +1,10 @@
-# TODO: Remove Division and Payment Method Fields and Features
+# TODO for KendaliKas Excel Import Fix and Testing
 
-- [ ] Remove "Division" and "Payment Method" input fields from the transaction form in index.html
-- [ ] Remove "Division" and "Payment Method" columns from the transaction table header
-- [ ] Update colspan in empty table message from 8 to 6
-- [ ] Remove division and paymentMethod <td> elements from displayTransactions and displayFilteredTransactions functions
-- [ ] Remove division and paymentMethod from transaction payload in add/update JavaScript code
-- [ ] Remove division and paymentMethod population in editTransaction function
-- [ ] Remove Division and Payment Method from export Excel data mapping
-- [ ] Remove Division and Payment Method from import Excel expected headers, headerMap, and transaction object
-- [ ] Test the app to ensure no errors and functionality works without these fields
+- [x] Fix Excel import code to remove undefined variables (division, paymentMethod) from transactionsToAdd.
+- [x] Verify code changes are correctly applied and no syntax errors remain.
+- [ ] Test Excel import with valid and invalid files to ensure proper import and error handling.
+  - Note: Testing requires Firebase authentication setup and valid Excel files
+- [ ] Verify UI behavior for import drag-drop area and file selection.
+- [ ] Verify that imported transactions appear correctly in the transaction table.
+- [ ] Test other functionalities (add, edit, delete transactions) to ensure no regressions.
+- [ ] Review and optimize any other related code if needed.

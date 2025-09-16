@@ -1379,8 +1379,6 @@ async function uploadProofFile(file) {
 document.getElementById('transactionForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   const nama = document.getElementById('nama').value.trim();
-  const division = document.getElementById('division').value.trim();
-  const paymentMethod = document.getElementById('paymentMethod').value.trim();
   const jenis = document.getElementById('jenis').value;
   const jumlahRaw = document.getElementById('jumlah').value.replace(/\./g, '');
   const jumlah = Number(jumlahRaw) || 0;
@@ -1399,7 +1397,7 @@ document.getElementById('transactionForm').addEventListener('submit', async func
       // update
       const refDoc = doc(db, 'transactions', editingId);
       const payload = {
-        nama, division, paymentMethod, jenis, jumlah, tanggal, kategori,
+        nama, jenis, jumlah, tanggal, kategori,
         proofUrl: proofUrl || null,
         userId: currentUser.uid,
         uploader: currentUser.email || currentUser.displayName || 'Unknown',
@@ -1409,7 +1407,7 @@ document.getElementById('transactionForm').addEventListener('submit', async func
     } else {
       // create
       await addDoc(collection(db, 'transactions'), {
-        nama, division, paymentMethod, jenis, jumlah, tanggal, kategori,
+        nama, jenis, jumlah, tanggal, kategori,
         proofUrl: proofUrl || null,
         userId: currentUser.uid,
         tableId: currentTable,
@@ -1431,7 +1429,7 @@ document.getElementById('transactionForm').addEventListener('submit', async func
     function displayTransactions() {
       const tbody = document.getElementById('transactionTableBody');
       if (!transactionData || transactionData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666;">Belum ada transaksi</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">Belum ada transaksi</td></tr>';
         return;
       }
 
@@ -1451,8 +1449,6 @@ document.getElementById('transactionForm').addEventListener('submit', async func
             <td>${formattedDate}</td>
         <td>${transaction.nama}</td>
         <td>${transaction.kategori}</td>
-        <td>${transaction.division || '-'}</td>
-        <td>${transaction.paymentMethod || '-'}</td>
         <td>
           <span style="color: ${transaction.jenis === 'pemasukan' ? '#4CAF50' : '#f44336'}">
             ${transaction.jenis === 'pemasukan' ? 'Income' : 'Expense'}
@@ -1504,7 +1500,7 @@ function filterTransactions() {
     function displayFilteredTransactions(data) {
       const tbody = document.getElementById('transactionTableBody');
       if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666;">No matching transactions</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">No matching transactions</td></tr>';
         return;
       }
       let html = '';
@@ -1520,8 +1516,6 @@ function filterTransactions() {
             <td>${formattedDate}</td>
             <td>${transaction.nama}</td>
             <td>${transaction.kategori}</td>
-            <td>${transaction.division || '-'}</td>
-            <td>${transaction.paymentMethod || '-'}</td>
             <td>
               <span style="color: ${transaction.jenis === 'pemasukan' ? '#4CAF50' : '#f44336'}">
                 ${transaction.jenis === 'pemasukan' ? 'Income' : 'Expense'}
@@ -1590,8 +1584,6 @@ window.editTransaction = function(id) {
   const transaction = transactionData.find(t => t.id === id);
   if (!transaction) return;
   document.getElementById('nama').value = transaction.nama || '';
-  document.getElementById('division').value = transaction.division || '';
-  document.getElementById('paymentMethod').value = transaction.paymentMethod || '';
   document.getElementById('jenis').value = transaction.jenis || '';
   document.getElementById('jumlah').value = formatInputValue(transaction.jumlah || 0);
   document.getElementById('tanggal').value = transaction.tanggal || '';
@@ -1668,8 +1660,6 @@ document.getElementById('exportExcelBtn').addEventListener('click', () => {
     Date: t.tanggal ? new Date(t.tanggal).toLocaleDateString('id-ID') : '',
     'Transaction Name': t.nama,
     Category: t.kategori,
-    Division: t.division || '',
-    'Payment Method': t.paymentMethod || '',
     Type: t.jenis === 'pemasukan' ? 'Income' : 'Expense',
     Amount: t.jumlah
   }));
@@ -1734,7 +1724,7 @@ document.getElementById('importExcelBtn').addEventListener('click', async () => 
     }
     const headers = jsonData[0];
     console.log('Headers in Excel file:', headers);
-    const expectedHeaders = ['Date', 'Transaction Name', 'Category', 'Division', 'Payment Method', 'Type', 'Amount'];
+    const expectedHeaders = ['Date', 'Transaction Name', 'Category', 'Type', 'Amount'];
     console.log('Expected headers:', expectedHeaders);
     const headerMap = {};
     expectedHeaders.forEach(h => {
@@ -1753,8 +1743,6 @@ document.getElementById('importExcelBtn').addEventListener('click', async () => 
       const dateStr = row[headerMap['Date']];
       const nama = row[headerMap['Transaction Name']];
       const kategori = row[headerMap['Category']] || 'Umum';
-      const division = row[headerMap['Division']] || '';
-      const paymentMethod = row[headerMap['Payment Method']] || '';
       const typeStr = row[headerMap['Type']];
       const amount = row[headerMap['Amount']];
       if (!nama || !typeStr || amount == null) {
@@ -1791,8 +1779,6 @@ document.getElementById('importExcelBtn').addEventListener('click', async () => 
       transactionsToAdd.push({
         nama: nama.toString().trim(),
         kategori: kategori.toString().trim(),
-        division: division.toString().trim(),
-        paymentMethod: paymentMethod.toString().trim(),
         jenis,
         jumlah,
         tanggal,
