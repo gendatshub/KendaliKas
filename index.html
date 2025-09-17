@@ -596,22 +596,7 @@
       }
     }
 
-    .search-input {
-      padding: 6px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      flex: 1;
-      min-width: 100px;
-    }
 
-    .filter-select {
-      padding: 6px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      flex: 1;
-      min-width: 120px;
-      max-width: 150px;
-    }
 
     .summary-cards {
       display: grid;
@@ -937,12 +922,6 @@
         <h2 id="dataTransaksiHeader">Transaction Data</h2>
 
         <div class="search-container">
-          <input type="text" class="search-input" id="searchInput" placeholder="Search transactions..." onkeyup="filterTransactions()">
-          <select class="filter-select" id="filterType" onchange="filterTransactions()">
-            <option value="">All Types</option>
-            <option value="pemasukan">Income</option>
-            <option value="pengeluaran">Expense</option>
-          </select>
           <button id="btnCollaborator" class="icon-button circle" aria-label="Menu Collaborator" title="Collaborator Menu" type="button" tabindex="0" style="margin-left: auto;">
             <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
@@ -1458,57 +1437,9 @@ document.getElementById('transactionForm').addEventListener('submit', async func
       tbody.innerHTML = html;
     }
 
-function filterTransactions() {
-  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-  const filterType = document.getElementById('filterType').value;
-  const filteredData = transactionData.filter(transaction => {
-    const matchesSearch = (transaction.nama || '').toLowerCase().includes(searchTerm) ||
-                          (transaction.kategori || '').toLowerCase().includes(searchTerm);
-    const matchesType = !filterType || transaction.jenis === filterType;
-    return matchesSearch && matchesType;
-  });
-  displayFilteredTransactions(filteredData);
-}
 
-    function displayFilteredTransactions(data) {
-      const tbody = document.getElementById('transactionTableBody');
-      if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">No matching transactions</td></tr>';
-        return;
-      }
-      let html = '';
-      data.forEach(transaction => {
-        const formattedDate = transaction.tanggal
-          ? new Date(transaction.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'2-digit', year:'numeric' })
-          : '-';
-        const formattedAmount = formatCurrency(transaction.jumlah);
-        const lastEdited = transaction.updatedAt || transaction.createdAt;
-        const formattedLastEdited = lastEdited && lastEdited.toDate ? lastEdited.toDate().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) : '-';
-        html += `
-          <tr>
-            <td>${formattedDate}</td>
-            <td>${transaction.nama}</td>
-            <td>${transaction.kategori}</td>
-            <td>
-              <span style="color: ${transaction.jenis === 'pemasukan' ? '#4CAF50' : '#f44336'}">
-                ${transaction.jenis === 'pemasukan' ? 'Income' : 'Expense'}
-              </span>
-            </td>
-            <td class="${transaction.jenis === 'pemasukan' ? 'income-amount' : 'expense-amount'}">
-              ${formattedAmount}
-            </td>
-            <td>
-              <div class="action-buttons">
-                <button class="info-btn" onclick="showMoreInfo('${transaction.id}')" title="More Information" aria-label="More Information"></button>
-                <button class="edit-btn" onclick="window.editTransaction('${transaction.id}')" title="Edit" aria-label="Edit"></button>
-                <button class="delete-btn" onclick="window.deleteTransaction('${transaction.id}')" title="Delete" aria-label="Delete"></button>
-              </div>
-            </td>
-          </tr>
-        `;
-      });
-      tbody.innerHTML = html;
-    }
+
+
 
 function updateSummary() {
   const totalIncome = transactionData
