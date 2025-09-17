@@ -831,11 +831,6 @@
               <input type="text" id="kategori" name="kategori" placeholder="Example: Salary, Shopping, Transport" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
             </div>
 
-            <div style="margin-bottom: 15px;">
-              <label for="bukti">Transaction Proof (optional):</label><br>
-              <input type="file" id="bukti" name="bukti" accept="image/*" style="margin-top:5px;">
-            </div>
-
             <button type="submit" id="submitBtn" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s ease;">Save Transaction</button>
           </form>
         </div>
@@ -1023,9 +1018,6 @@ import {
   getFirestore, collection, addDoc, onSnapshot, query, orderBy, where,
   doc, updateDoc, deleteDoc, serverTimestamp, getDocs, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-import {
-  getStorage, ref, uploadBytesResumable, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
 /* -----------------------
    2) FIREBASE CONFIG - GANTI DENGAN MILIKMU
@@ -1145,7 +1137,6 @@ window.deleteTable = async function(tableId) {
 }
 const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
 
 let currentUser = null; // to store current user
 let currentTable = null; // to store current table id
@@ -1376,26 +1367,7 @@ function formatInputValue(num) {
 /* -----------------------
    7) UPLOAD FILE TO STORAGE
    ----------------------- */
-async function uploadProofFile(file) {
-  if (!file) return null;
-  const path = `proofs/${Date.now()}_${file.name}`;
-  const storageRef = ref(storage, path);
-  const uploadTask = uploadBytesResumable(storageRef, file);
-  return new Promise((resolve, reject) => {
-    uploadTask.on('state_changed',
-      null,
-      (error) => reject(error),
-      async () => {
-        try {
-          const url = await getDownloadURL(uploadTask.snapshot.ref);
-          resolve(url);
-        } catch (e) {
-          reject(e);
-        }
-      }
-    );
-  });
-}
+// Removed uploadProofFile function as part of removing Transaction Proof feature
 
 /* -----------------------
    8) ADD / UPDATE TRANSACTION
@@ -1408,21 +1380,13 @@ document.getElementById('transactionForm').addEventListener('submit', async func
   const jumlah = Number(jumlahRaw) || 0;
   const tanggal = document.getElementById('tanggal').value; // 'YYYY-MM-DD'
   const kategori = document.getElementById('kategori').value || 'Umum';
-  const file = document.getElementById('bukti')?.files?.[0] ?? null;
 
   try {
-    // upload file (jika ada)
-    let proofUrl = null;
-    if (file) {
-      proofUrl = await uploadProofFile(file);
-    }
-
     if (editingId) {
       // update
       const refDoc = doc(db, 'transactions', editingId);
       const payload = {
         nama, jenis, jumlah, tanggal, kategori,
-        proofUrl: proofUrl || null,
         userId: currentUser.uid,
         uploader: currentUser.email || currentUser.displayName || 'Unknown',
         updatedAt: serverTimestamp()
@@ -1432,7 +1396,6 @@ document.getElementById('transactionForm').addEventListener('submit', async func
       // create
       await addDoc(collection(db, 'transactions'), {
         nama, jenis, jumlah, tanggal, kategori,
-        proofUrl: proofUrl || null,
         userId: currentUser.uid,
         tableId: currentTable,
         uploader: currentUser.email || currentUser.displayName || 'Unknown',
