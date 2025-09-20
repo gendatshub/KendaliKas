@@ -928,7 +928,8 @@
         <h2 id="dataTransaksiHeader">Transaction Data</h2>
 
         <div class="search-container">
-          <button id="btnCollaborator" class="icon-button circle" aria-label="Menu Collaborator" title="Collaborator Menu" type="button" tabindex="0" style="margin-left: auto;">
+          <input type="text" id="searchInput" placeholder="Search by transaction name..." style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-right: 10px;">
+          <button id="btnCollaborator" class="icon-button circle" aria-label="Menu Collaborator" title="Collaborator Menu" type="button" tabindex="0">
             <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
@@ -1400,13 +1401,20 @@ document.getElementById('transactionForm').addEventListener('submit', async func
    ----------------------- */
     function displayTransactions() {
       const tbody = document.getElementById('transactionTableBody');
-      if (!transactionData || transactionData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">Belum ada transaksi</td></tr>';
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+      
+      // Filter transactions based on search term and current table
+      const filteredData = transactionData.filter(transaction => 
+        transaction.nama.toLowerCase().includes(searchTerm)
+      );
+      
+      if (!filteredData || filteredData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">No transactions found</td></tr>';
         return;
       }
 
       let html = '';
-      transactionData.forEach(transaction => {
+      filteredData.forEach(transaction => {
         const formattedDate = transaction.tanggal
           ? new Date(transaction.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'2-digit', year:'numeric' })
           : (transaction.createdAt && transaction.createdAt.toDate)
@@ -1496,6 +1504,11 @@ window.editTransaction = function(id) {
 displayTransactions();
 updateSummary();
 document.getElementById('tanggal').valueAsDate = new Date();
+
+// Initialize search input event listener
+document.getElementById('searchInput').addEventListener('input', () => {
+  displayTransactions();
+});
 
 // Ubah tombol submit jadi punya id agar bisa diganti label saat edit
 const submitBtn = document.querySelector('#transactionForm button[type="submit"]');
@@ -1775,6 +1788,8 @@ function parseDate(dateStr) {
     modal.classList.remove('show');
   }
 </script>
+
+
 
  </body>
 </html>
