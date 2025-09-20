@@ -281,6 +281,120 @@
       fill: #1769aa;
     }
 
+    /* Notification Item Styles */
+    .notification-item {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      background: white;
+      transition: background-color 0.3s ease;
+    }
+
+    .notification-item:hover {
+      background-color: #f5f5f5;
+    }
+
+    .notification-item:last-child {
+      border-bottom: none;
+    }
+
+    .notification-item.unread {
+      background-color: #e3f2fd;
+      border-left: 4px solid #2196F3;
+    }
+
+    .notification-item.read {
+      background-color: white;
+    }
+
+    .notification-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 4px;
+    }
+
+    .notification-title {
+      font-weight: 600;
+      color: #333;
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .notification-time {
+      font-size: 11px;
+      color: #666;
+    }
+
+    .notification-message {
+      font-size: 13px;
+      color: #555;
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    .notification-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .notification-action-btn {
+      padding: 4px 8px;
+      border: none;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .notification-action-btn.approve {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .notification-action-btn.approve:hover {
+      background-color: #45a049;
+    }
+
+    .notification-action-btn.reject {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .notification-action-btn.reject:hover {
+      background-color: #d32f2f;
+    }
+
+    .notification-type {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-left: 8px;
+    }
+
+    .notification-type.access-request {
+      background-color: #FFF3E0;
+      color: #E65100;
+    }
+
+    .notification-type.info {
+      background-color: #E3F2FD;
+      color: #0D47A1;
+    }
+
+    .notification-type.success {
+      background-color: #E8F5E8;
+      color: #2E7D32;
+    }
+
+    .notification-type.warning {
+      background-color: #FFF8E1;
+      color: #F57F17;
+    }
+
     /* Modal for Table Menu */
     #menuTable {
       position: fixed;
@@ -1183,7 +1297,7 @@
     } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
     import {
       getFirestore, collection, addDoc, onSnapshot, query, orderBy, where,
-      doc, updateDoc, deleteDoc, serverTimestamp, getDocs, writeBatch
+      doc, updateDoc, deleteDoc, serverTimestamp, getDocs, writeBatch, getDoc
     } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
     /* -----------------------
@@ -1233,13 +1347,20 @@
     // Get tables the user has access to (but doesn't own)
     async function getAccessibleTables(userId) {
       try {
+        // Query without orderBy to avoid composite index requirement
         const q = query(collection(db, 'tableAccess'),
           where('userId', '==', userId),
-          where('status', '==', 'granted'),
-          orderBy('grantedAt', 'desc')
+          where('status', '==', 'granted')
         );
         const snapshot = await getDocs(q);
         const accessibleTables = snapshot.docs.map(d => ({ id: d.id, ...d.data(), isOwner: false }));
+
+        // Sort by grantedAt in memory
+        accessibleTables.sort((a, b) => {
+          const dateA = a.grantedAt?.toDate?.() || new Date(0);
+          const dateB = b.grantedAt?.toDate?.() || new Date(0);
+          return dateB - dateA; // descending order
+        });
 
         // Get the actual table data for accessible tables
         for (const access of accessibleTables) {
@@ -1357,6 +1478,7 @@
     let currentUser = null; // to store current user
     let currentTable = null; // to store current table id
     let tablesData = []; // array of tables
+    let notificationsData = []; // array of notifications
 
     /* -----------------------
        4) UI / NAV / MODAL (sama seperti sebelumnya)
