@@ -220,6 +220,65 @@
       position: relative;
     }
 
+    /* Notification Menu Modal */
+    #menuNotification {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.4);
+      display: flex;
+      z-index: 1002;
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.15s ease;
+    }
+
+    #menuNotification.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #menuNotification.closing {
+      pointer-events: none;
+    }
+
+    #menuNotification > div {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 320px;
+      width: 90%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .notification-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .notification-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: #2196F3;
+    }
+
+    .notification-btn:hover svg {
+      fill: #1769aa;
+    }
+
     /* Modal for Table Menu */
     #menuTable {
       position: fixed;
@@ -742,7 +801,7 @@
         height: 28px;
       }
     </style>
-</head>
+  </head>
   <body>
 
   <!-- Hamburger Menu Button -->
@@ -832,7 +891,24 @@
         <div>
           <button class="close-btn" onclick="closeCollaboratorMenu()">×</button>
           <h1>Collaborator Menu</h1>
+          <button class="notification-btn" onclick="openNotificationMenu(event)">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
+            </svg>
+          </button>
           <!-- Content will be added later -->
+        </div>
+      </div>
+
+      <!-- Modal for Notification Menu -->
+      <div id="menuNotification">
+        <div>
+          <button class="close-btn" onclick="closeNotificationMenu()">×</button>
+          <h1>Notifications</h1>
+          <div id="notificationList">
+            <!-- Notifications will be loaded here -->
+            <p>No new notifications</p>
+          </div>
         </div>
       </div>
 
@@ -1224,6 +1300,25 @@ links.forEach(link => {
   };
   menuCollaborator.addEventListener('click', (e) => {
     if (e.target === menuCollaborator) window.closeCollaboratorMenu();
+  });
+
+  // Notification Menu Modal
+  const menuNotification = document.getElementById('menuNotification');
+
+  window.openNotificationMenu = function(event) {
+    event.stopPropagation();
+    menuNotification.classList.add('show');
+  };
+
+  window.closeNotificationMenu = function() {
+    menuNotification.classList.remove('show');
+  };
+
+  // Close notification menu when clicking outside
+  menuNotification.addEventListener('click', (e) => {
+    if (e.target === menuNotification) {
+      closeNotificationMenu();
+    }
   });
 
   // Table Menu Modal
