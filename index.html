@@ -956,15 +956,13 @@
                 d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z" />
             </svg>
           </button>
-          <form id="requestAccessForm">
-            <div style="margin-bottom: 15px;">
-              <label for="tableId">Table ID:</label><br>
-              <input type="text" id="tableId" name="tableId" required
-                style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
+          <div id="collaboratorList">
+            <div
+              style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px;">
+              <span>collaborator@example.com</span>
+              <span>(viewer)</span>
             </div>
-            <button type="submit"
-              style="width: 100%; padding: 10px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Submit</button>
-          </form>
+          </div>
         </div>
       </div>
 
@@ -1002,13 +1000,15 @@
         <div>
           <button class="close-btn" onclick="closeRequestAccessMenu()">×</button>
           <h1>Request Access Menu</h1>
-          <div id="collaboratorList">
-            <div
-              style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px;">
-              <span>collaborator@example.com</span>
-              <span>(viewer)</span>
+          <form id="requestAccessForm">
+            <div style="margin-bottom: 15px;">
+              <label for="tableId">Table ID:</label><br>
+              <input type="text" id="tableId" name="tableId" required
+                style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
             </div>
-          </div>
+            <button type="submit"
+              style="width: 100%; padding: 10px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Submit</button>
+          </form>
         </div>
       </div>
 
