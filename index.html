@@ -532,6 +532,7 @@
       max-height: 70vh;
       overflow: auto;
       -webkit-overflow-scrolling: touch;
+      position: relative;
     }
 
     .transaction-table {
@@ -540,7 +541,18 @@
       background-color: white;
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
       border-radius: 8px;
-      overflow: hidden;
+      overflow: auto;
+      min-width: 600px;
+    }
+
+    .transaction-table thead th {
+      position: sticky;
+      top: 0;
+      background-color: #2196F3;
+      color: white;
+      z-index: 2;
+      background-clip: padding-box;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     }
 
     .transaction-table tbody {
@@ -552,12 +564,6 @@
       padding: 12px 15px;
       text-align: left;
       border-bottom: 1px solid #eee;
-    }
-
-    .transaction-table th {
-      background-color: #2196F3;
-      color: white;
-      font-weight: 600;
     }
 
     .transaction-table tr:hover {
