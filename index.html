@@ -1211,7 +1211,12 @@
     function subscribeTables(userId) {
       const q = query(collection(db, 'tables'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
       onSnapshot(q, async (snapshot) => {
-        tablesData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        const ownedTables = snapshot.docs.map(d => ({ id: d.id, ...d.data(), isOwner: true }));
+        tablesData = ownedTables;
+
+        // Also get accessible tables
+        await getAccessibleTables(userId);
+
         if (tablesData.length === 0) {
           await createDefaultTable(userId);
         } else {
@@ -1223,6 +1228,31 @@
           subscribeTransactions(userId, currentTable);
         }
       });
+    }
+
+    // Get tables the user has access to (but doesn't own)
+    async function getAccessibleTables(userId) {
+      try {
+        const q = query(collection(db, 'tableAccess'),
+          where('userId', '==', userId),
+          where('status', '==', 'granted'),
+          orderBy('grantedAt', 'desc')
+        );
+        const snapshot = await getDocs(q);
+        const accessibleTables = snapshot.docs.map(d => ({ id: d.id, ...d.data(), isOwner: false }));
+
+        // Get the actual table data for accessible tables
+        for (const access of accessibleTables) {
+          const tableRef = doc(db, 'tables', access.tableId);
+          const tableSnap = await getDoc(tableRef);
+          if (tableSnap.exists()) {
+            const tableData = { id: access.tableId, ...tableSnap.data(), isOwner: false, accessId: access.id };
+            tablesData.push(tableData);
+          }
+        }
+      } catch (err) {
+        console.error('Error getting accessible tables:', err);
+      }
     }
 
     async function createDefaultTable(userId) {
@@ -1255,10 +1285,29 @@
       tablesData.sort((a, b) => a.name.localeCompare(b.name));
       tablesData.forEach(table => {
         const isActive = table.id === currentTable;
+        const isOwner = table.isOwner;
+        const accessStatus = isOwner ? 'Owner' : 'Access Granted';
+
+        // Different styling for owned vs accessed tables
+        const backgroundColor = isActive ? '#e3f2fd' : 'white';
+        const borderColor = isOwner ? '#4CAF50' : '#2196F3';
+        const statusColor = isOwner ? '#4CAF50' : '#2196F3';
+        const statusIcon = isOwner ? '👑' : '🔓';
+
         html += `
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px; background: ${isActive ? '#e3f2fd' : 'white'}; ${!isActive ? 'cursor: pointer;' : ''}" ${!isActive ? `onclick="switchTable('${table.id}')"` : ''}>
-        <span>${table.name}</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 2px solid ${borderColor}; margin-bottom: 5px; border-radius: 4px; background: ${backgroundColor}; ${!isActive ? 'cursor: pointer;' : ''}" ${!isActive ? `onclick="switchTable('${table.id}')"` : ''}>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-weight: 600; color: #333;">${table.name}</span>
+          <span style="font-size: 12px; color: ${statusColor}; display: flex; align-items: center; gap: 4px;">
+            ${statusIcon} ${accessStatus}
+          </span>
+        </div>
         <div>
+          ${!isOwner ? `
+            <button onclick="event.stopPropagation(); showTableAccessInfo('${table.id}')" style="padding: 4px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 5px; display: flex; align-items: center; justify-content: center; font-size: 12px;" title="Access Info">
+              ℹ️
+            </button>
+          ` : ''}
           <button onclick="event.stopPropagation(); openDeleteTableModal('${table.id}')" style="padding: 6px; background: #4a90e2; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 5px; display: flex; align-items: center; justify-content: center;" title="More Info">
             <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="currentColor">
               <circle cx="12" cy="7" r="2"/>
@@ -1457,9 +1506,70 @@
     if (requestAccessBtn) requestAccessBtn.addEventListener('click', () => { requestAccessMenu.classList.add('show'); });
     window.closeRequestAccessMenu = function () {
       requestAccessMenu.classList.remove('show');
+      document.getElementById('requestAccessForm').reset();
     };
     requestAccessMenu.addEventListener('click', (e) => {
       if (e.target === requestAccessMenu) window.closeRequestAccessMenu();
+    });
+
+    // Request Access Form Submission
+    document.getElementById('requestAccessForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const tableId = document.getElementById('tableId').value.trim();
+
+      if (!tableId) {
+        alert('Please enter a table ID.');
+        return;
+      }
+
+      try {
+        // Check if table exists
+        const tableRef = doc(db, 'tables', tableId);
+        const tableSnap = await getDoc(tableRef);
+
+        if (!tableSnap.exists()) {
+          alert('Table not found. Please check the table ID and try again.');
+          return;
+        }
+
+        const tableData = tableSnap.data();
+
+        // Check if user already has access to this table
+        const existingAccessQuery = query(
+          collection(db, 'tableAccess'),
+          where('userId', '==', currentUser.uid),
+          where('tableId', '==', tableId),
+          where('status', '==', 'granted')
+        );
+        const existingAccess = await getDocs(existingAccessQuery);
+
+        if (!existingAccess.empty) {
+          alert('You already have access to this table.');
+          return;
+        }
+
+        // Check if user already owns this table
+        if (tableData.userId === currentUser.uid) {
+          alert('You already own this table.');
+          return;
+        }
+
+        // Create access request
+        await addDoc(collection(db, 'tableAccess'), {
+          tableId: tableId,
+          userId: currentUser.uid,
+          requestedBy: currentUser.email || currentUser.displayName || 'Unknown',
+          status: 'pending',
+          requestedAt: serverTimestamp()
+        });
+
+        alert('Access request sent successfully! You will be able to access the table once the owner approves it.');
+        closeRequestAccessMenu();
+
+      } catch (err) {
+        console.error('Error requesting access:', err);
+        alert('Failed to send access request. Please try again.');
+      }
     });
 
     // Create Table Modal
