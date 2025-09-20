@@ -451,6 +451,44 @@
       display: none;
     }
 
+    /* Modal for Request Access Menu */
+    #requestAccessMenu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.4);
+      display: flex;
+      z-index: 1002;
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.15s ease;
+    }
+
+    #requestAccessMenu.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #requestAccessMenu.closing {
+      pointer-events: none;
+    }
+
+    #requestAccessMenu > div {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 320px;
+      width: 90%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
     /* Modal for Create Table */
     #createTableModal {
       position: fixed;
@@ -925,6 +963,15 @@
         </div>
       </div>
 
+      <!-- Modal for Request Access Menu -->
+      <div id="requestAccessMenu">
+        <div>
+          <button class="close-btn" onclick="closeRequestAccessMenu()">×</button>
+          <h1>Request Access Menu</h1>
+          <!-- Content will be added later -->
+        </div>
+      </div>
+
       <!-- Modal for Create Table -->
       <div id="createTableModal">
         <div>
@@ -1344,6 +1391,18 @@ links.forEach(link => {
   };
   menuExportImport.addEventListener('click', (e) => {
     if (e.target === menuExportImport) window.closeExportImportMenu();
+  });
+
+  // Request Access Menu Modal
+  const requestAccessBtn = document.getElementById('requestAccessBtn');
+  const requestAccessMenu = document.getElementById('requestAccessMenu');
+
+  if (requestAccessBtn) requestAccessBtn.addEventListener('click', () => { requestAccessMenu.classList.add('show'); });
+  window.closeRequestAccessMenu = function() {
+    requestAccessMenu.classList.remove('show');
+  };
+  requestAccessMenu.addEventListener('click', (e) => {
+    if (e.target === requestAccessMenu) window.closeRequestAccessMenu();
   });
 
   // Create Table Modal
