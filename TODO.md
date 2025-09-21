@@ -1,29 +1,11 @@
-# Modal Button Styling Improvements
+# TODO
 
-## Plan Steps:
-- [x] Create TODO tracking file
-- [x] Update CSS with improved modal button styling
-- [ ] Update HTML to remove inline styles and add proper classes
-- [ ] Test modal functionality after styling changes
+- [x] Implement collaborator menu scoping to selected table in script.js
+  - Subscribe to collaborators for currentTable
+  - Display collaborators in collaborator menu modal
+  - Refresh subscription/display on table switch and menu open
 
-## Detailed Implementation:
-1. **CSS Improvements:**
-   - Create consistent button classes for all modal buttons
-   - Add proper hover, focus, and active states
-   - Improve spacing and visual hierarchy
-   - Add better color schemes and shadows
-   - Ensure responsive design
-
-2. **Specific Button Fixes:**
-   - **Collaborator Menu**: Style the notification button with better icon alignment
-   - **Table Menu**: Improve "Make Table" and "Request Access" button styling
-   - **Export-Import Menu**: Enhance export/import button design with better icons and layout
-
-3. **HTML Structure Improvements:**
-   - Remove inline styles from buttons
-   - Add proper classes for consistent styling
-   - Improve accessibility with better ARIA labels
-
-4. **Responsive Design:**
-   - Ensure buttons work well on mobile devices
-   - Proper touch targets for mobile users
+- [ ] Verify no redundant or duplicate code in script.js after edits
+- [ ] Test collaborator menu shows correct collaborators for selected table
+- [ ] Test switching tables updates collaborator menu data correctly
+- [ ] Test notification menu and other features remain unaffected

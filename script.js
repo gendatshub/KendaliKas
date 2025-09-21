@@ -153,6 +153,8 @@
       currentTable = tableId;
       displayTables();
       subscribeTransactions(currentUser.uid, currentTable);
+      subscribePendingRequests(currentUser.uid);
+      subscribeCollaborators(currentTable);
       closeTableMenu();
     }
 
@@ -185,12 +187,20 @@
     let currentTable = null; // to store current table id
     let tablesData = []; // array of tables
     let notificationsData = []; // array of notifications
+    let collaboratorsData = []; // array of collaborators
+    let collaboratorsUnsubscribe = null; // to store unsubscribe function for collaborators subscription
 
-    // Function to subscribe to pending access requests for tables owned by current user
+    // Function to subscribe to pending access requests for tables owned by current user and filtered by currentTable
     function subscribePendingRequests(userId) {
+      if (!currentTable) {
+        notificationsData = [];
+        displayNotifications();
+        return;
+      }
       const q = query(
         collection(db, 'tableAccess'),
-        where('status', '==', 'pending')
+        where('status', '==', 'pending'),
+        where('tableId', '==', currentTable)
       );
 
       onSnapshot(q, async (snapshot) => {
@@ -213,6 +223,52 @@
       });
     }
 
+    // Function to subscribe to collaborators for the current selected table
+    function subscribeCollaborators(tableId) {
+      if (collaboratorsUnsubscribe) {
+        collaboratorsUnsubscribe(); // unsubscribe previous listener
+        collaboratorsUnsubscribe = null;
+      }
+      if (!tableId) {
+        collaboratorsData = [];
+        displayCollaborators();
+        return;
+      }
+      const q = query(
+        collection(db, 'tableAccess'),
+        where('tableId', '==', tableId),
+        where('status', '==', 'granted')
+      );
+      collaboratorsUnsubscribe = onSnapshot(q, async (snapshot) => {
+        const collabs = [];
+        for (const docSnap of snapshot.docs) {
+          const data = docSnap.data();
+          collabs.push({ id: docSnap.id, ...data });
+        }
+        collaboratorsData = collabs;
+        displayCollaborators();
+      });
+    }
+
+    // Function to display collaborators in the collaborator menu
+    function displayCollaborators() {
+      const collaboratorList = document.getElementById('collaboratorList');
+      if (!collaboratorsData || collaboratorsData.length === 0) {
+        collaboratorList.innerHTML = '<div class="empty-collaborators" style="text-align: center; padding: 20px; color: #666; font-style: italic;">No collaborators for this table</div>';
+        return;
+      }
+      let html = '';
+      collaboratorsData.forEach(collab => {
+        html += `
+          <div style="padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px;">
+            <div><strong>User ID:</strong> ${collab.userId || 'Unknown'}</div>
+            <div><strong>Status:</strong> ${collab.status || 'Unknown'}</div>
+          </div>
+        `;
+      });
+      collaboratorList.innerHTML = html;
+    }
+
     // Function to display notifications in the notification menu
     function displayNotifications() {
       const notificationList = document.getElementById('notificationList');
@@ -224,6 +280,8 @@
 
       let html = '';
       notificationsData.forEach(notification => {
+        if (notification.tableId !== currentTable) return; // filter by currentTable
+
         const requestedAt = notification.requestedAt?.toDate?.()
           ? notification.requestedAt.toDate().toLocaleDateString('id-ID', {
               day: '2-digit',
@@ -397,7 +455,10 @@
     const btnCollaborator = document.getElementById('btnCollaborator');
     const menuCollaborator = document.getElementById('menuCollaborator');
 
-    if (btnCollaborator) btnCollaborator.addEventListener('click', () => { menuCollaborator.classList.add('show'); });
+    if (btnCollaborator) btnCollaborator.addEventListener('click', () => {
+      menuCollaborator.classList.add('show');
+      displayCollaborators();
+    });
     window.closeCollaboratorMenu = function () {
       menuCollaborator.classList.remove('show');
     };
