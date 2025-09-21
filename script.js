@@ -814,14 +814,24 @@
     // Delete Table Modal
     const deleteTableModal = document.getElementById('deleteTableModal');
 
-    window.openDeleteTableModal = function (tableId) {
-      document.getElementById('deleteTableId').textContent = tableId;
-      const table = tablesData.find(t => t.id === tableId);
-      if (table) {
-        document.getElementById('deleteTableHeader').textContent = `Tabel ${table.name}`;
-      }
-      deleteTableModal.classList.add('show');
-    };
+window.openDeleteTableModal = function (tableId) {
+  document.getElementById('deleteTableId').textContent = tableId;
+  const table = tablesData.find(t => t.id === tableId);
+  if (table) {
+    document.getElementById('deleteTableHeader').textContent = `Tabel ${table.name}`;
+    const confirmBtn = document.getElementById('confirmDeleteTableBtn');
+    if (table.isOwner) {
+      confirmBtn.textContent = 'Delete Table';
+      confirmBtn.classList.remove('secondary');
+      confirmBtn.classList.add('danger');
+    } else {
+      confirmBtn.textContent = 'Discard Access';
+      confirmBtn.classList.remove('danger');
+      confirmBtn.classList.add('secondary');
+    }
+  }
+  deleteTableModal.classList.add('show');
+};
 
     window.closeDeleteTableModal = function () {
       deleteTableModal.classList.remove('show');
@@ -831,11 +841,48 @@
       if (e.target === deleteTableModal) window.closeDeleteTableModal();
     });
 
-    document.getElementById('confirmDeleteTableBtn').addEventListener('click', async () => {
-      const tableId = document.getElementById('deleteTableId').textContent;
-      await deleteTable(tableId);
-      closeDeleteTableModal();
-    });
+document.getElementById('confirmDeleteTableBtn').addEventListener('click', async () => {
+  const tableId = document.getElementById('deleteTableId').textContent;
+  const table = tablesData.find(t => t.id === tableId);
+  if (!table) {
+    alert('Table not found.');
+    closeDeleteTableModal();
+    return;
+  }
+  if (table.isOwner) {
+    // Owner: delete the table
+    await deleteTable(tableId);
+  } else {
+    // Not owner: discard access
+    try {
+      await discardTableAccess(tableId);
+      alert('Access to the table has been discarded.');
+    } catch (err) {
+      console.error('Error discarding access:', err);
+      alert('Failed to discard access to the table.');
+    }
+  }
+  closeDeleteTableModal();
+});
+
+async function discardTableAccess(tableId) {
+  // Find the access document for current user and tableId
+  const q = query(collection(db, 'tableAccess'),
+    where('userId', '==', currentUser.uid),
+    where('tableId', '==', tableId),
+    where('status', '==', 'granted')
+  );
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) {
+    throw new Error('No access record found.');
+  }
+  // Update the status to 'discarded' or delete the access document
+  const batch = writeBatch(db);
+  snapshot.docs.forEach(docSnap => {
+    batch.update(docSnap.ref, { status: 'discarded', discardedAt: serverTimestamp() });
+  });
+  await batch.commit();
+}
 
     // Export to Excel
     document.getElementById('exportExcelBtn').addEventListener('click', () => {
