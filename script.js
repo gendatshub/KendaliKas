@@ -126,7 +126,7 @@
         const statusIcon = isOwner ? '👑' : '🔓';
 
         html += `
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 2px solid ${borderColor}; margin-bottom: 5px; border-radius: 4px; background: ${backgroundColor}; ${!isActive ? 'cursor: pointer;' : ''}" ${!isActive ? `onclick="switchTable('${table.id}')"` : ''}>
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px; background: ${backgroundColor}; ${!isActive ? 'cursor: pointer;' : ''}" ${!isActive ? `onclick="switchTable('${table.id}')"` : ''}>
         <div style="display: flex; flex-direction: column; gap: 4px;">
           <span style="font-weight: 600; color: #333;">${table.name}</span>
           <span style="font-size: 12px; color: ${statusColor}; display: flex; align-items: center; gap: 4px;">
@@ -914,7 +914,7 @@
     }
 
     // More info modal functions
-    function showMoreInfo(transactionId) {
+    window.showMoreInfo = function(transactionId) {
       const modal = document.getElementById('moreInfoModal');
       const transaction = transactionData.find(t => t.id === transactionId);
       if (!transaction) return;
@@ -933,7 +933,7 @@
       modal.classList.add('show');
     }
 
-    function closeMoreInfoModal() {
+    window.closeMoreInfoModal = function() {
       const modal = document.getElementById('moreInfoModal');
       modal.classList.remove('show');
     }
