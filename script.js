@@ -265,7 +265,6 @@ function subscribeCollaborators(tableId) {
   });
 }
 
-// Function to display collaborators in the collaborator menu
 function displayCollaborators() {
   const collaboratorList = document.getElementById('collaboratorList');
   if (!collaboratorsData || collaboratorsData.length === 0) {
@@ -274,10 +273,27 @@ function displayCollaborators() {
   }
   let html = '';
   collaboratorsData.forEach(collab => {
+    // Map status to role for dropdown default value
+    let role = 'Viewer';
+    if (collab.status && collab.status.toLowerCase() === 'granted') {
+      role = 'Editor';
+    }
     html += `
-      <div style="padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px;">
-        <div><strong>Email:</strong> ${collab.email || 'Unknown'}</div>
-        <div><strong>Status:</strong> ${collab.status || 'Unknown'}</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px;">
+        <div style="flex: 1;">
+          <div style="font-weight: 600; color: #333; margin-bottom: 4px;">
+            ${collab.email || 'Unknown'}
+          </div>
+          <div style="font-size: 12px; color: #666;">
+            Role: ${role}
+          </div>
+        </div>
+        <div>
+          <select style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px;">
+            <option value="Editor" ${role === 'Editor' ? 'selected' : ''}>Editor</option>
+            <option value="Viewer" ${role === 'Viewer' ? 'selected' : ''}>Viewer</option>
+          </select>
+        </div>
       </div>
     `;
   });
