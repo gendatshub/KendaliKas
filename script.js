@@ -190,6 +190,127 @@
     let tablesData = []; // array of tables
     let notificationsData = []; // array of notifications
 
+    // Function to subscribe to pending access requests for tables owned by current user
+    function subscribePendingRequests(userId) {
+      const q = query(
+        collection(db, 'tableAccess'),
+        where('status', '==', 'pending')
+      );
+
+      onSnapshot(q, async (snapshot) => {
+        const pendingRequests = [];
+
+        for (const doc of snapshot.docs) {
+          const requestData = { id: doc.id, ...doc.data() };
+
+          // Check if this user owns the table
+          const tableRef = doc(db, 'tables', requestData.tableId);
+          const tableSnap = await getDoc(tableRef);
+
+          if (tableSnap.exists() && tableSnap.data().userId === userId) {
+            pendingRequests.push(requestData);
+          }
+        }
+
+        notificationsData = pendingRequests;
+        displayNotifications();
+      });
+    }
+
+    // Function to display notifications in the notification menu
+    function displayNotifications() {
+      const notificationList = document.getElementById('notificationList');
+
+      if (!notificationsData || notificationsData.length === 0) {
+        notificationList.innerHTML = '<p>No new notifications</p>';
+        return;
+      }
+
+      let html = '';
+      notificationsData.forEach(notification => {
+        const requestedAt = notification.requestedAt?.toDate?.()
+          ? notification.requestedAt.toDate().toLocaleDateString('id-ID', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })
+          : 'Unknown time';
+
+        html += `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px;">
+            <div style="flex: 1;">
+              <div style="font-weight: 600; color: #333; margin-bottom: 4px;">
+                ${notification.requestedBy || 'Unknown User'}
+              </div>
+              <div style="font-size: 12px; color: #666;">
+                Requested access to table
+              </div>
+              <div style="font-size: 11px; color: #999; margin-top: 2px;">
+                ${requestedAt}
+              </div>
+            </div>
+            <div style="display: flex; gap: 5px;">
+              <button onclick="acceptAccessRequest('${notification.id}', '${notification.tableId}', '${notification.userId}')"
+                      style="padding: 6px 12px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;"
+                      title="Accept Request">
+                ✓ Accept
+              </button>
+              <button onclick="declineAccessRequest('${notification.id}')"
+                      style="padding: 6px 12px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;"
+                      title="Decline Request">
+                ✗ Decline
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      notificationList.innerHTML = html;
+    }
+
+    // Function to accept access request
+    window.acceptAccessRequest = async function(requestId, tableId, userId) {
+      try {
+        const requestRef = doc(db, 'tableAccess', requestId);
+        await updateDoc(requestRef, {
+          status: 'granted',
+          grantedAt: serverTimestamp()
+        });
+
+        // Add the table to the user's accessible tables
+        await addDoc(collection(db, 'tableAccess'), {
+          tableId: tableId,
+          userId: userId,
+          status: 'granted',
+          grantedAt: serverTimestamp(),
+          grantedBy: currentUser.uid
+        });
+
+        alert('Access request accepted successfully!');
+      } catch (err) {
+        console.error('Error accepting access request:', err);
+        alert('Failed to accept access request. Please try again.');
+      }
+    }
+
+    // Function to decline access request
+    window.declineAccessRequest = async function(requestId) {
+      try {
+        const requestRef = doc(db, 'tableAccess', requestId);
+        await updateDoc(requestRef, {
+          status: 'denied',
+          deniedAt: serverTimestamp()
+        });
+
+        alert('Access request declined.');
+      } catch (err) {
+        console.error('Error declining access request:', err);
+        alert('Failed to decline access request. Please try again.');
+      }
+    }
+
     /* -----------------------
        4) UI / NAV / MODAL (sama seperti sebelumnya)
        ----------------------- */
@@ -474,6 +595,8 @@
         loadingProfile.style.display = 'none';
         // Subscribe to user's tables
         subscribeTables(user.uid);
+        // Subscribe to pending access requests for tables owned by this user
+        subscribePendingRequests(user.uid);
       } else {
         currentUser = null;
         // User not logged in, redirect to login
