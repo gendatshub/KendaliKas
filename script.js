@@ -223,51 +223,66 @@
       });
     }
 
-    // Function to subscribe to collaborators for the current selected table
-    function subscribeCollaborators(tableId) {
-      if (collaboratorsUnsubscribe) {
-        collaboratorsUnsubscribe(); // unsubscribe previous listener
-        collaboratorsUnsubscribe = null;
-      }
-      if (!tableId) {
-        collaboratorsData = [];
-        displayCollaborators();
-        return;
-      }
-      const q = query(
-        collection(db, 'tableAccess'),
-        where('tableId', '==', tableId),
-        where('status', '==', 'granted')
-      );
-      collaboratorsUnsubscribe = onSnapshot(q, async (snapshot) => {
-        const collabs = [];
-        for (const docSnap of snapshot.docs) {
-          const data = docSnap.data();
-          collabs.push({ id: docSnap.id, ...data });
-        }
-        collaboratorsData = collabs;
-        displayCollaborators();
-      });
+async function fetchUserEmail(userId) {
+  try {
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      return userData.email || 'Unknown Email';
     }
+    return 'Unknown Email';
+  } catch (error) {
+    console.error('Error fetching user email:', error);
+    return 'Unknown Email';
+  }
+}
 
-    // Function to display collaborators in the collaborator menu
-    function displayCollaborators() {
-      const collaboratorList = document.getElementById('collaboratorList');
-      if (!collaboratorsData || collaboratorsData.length === 0) {
-        collaboratorList.innerHTML = '<div class="empty-collaborators" style="text-align: center; padding: 20px; color: #666; font-style: italic;">No collaborators for this table</div>';
-        return;
-      }
-      let html = '';
-      collaboratorsData.forEach(collab => {
-        html += `
-          <div style="padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px;">
-            <div><strong>User ID:</strong> ${collab.userId || 'Unknown'}</div>
-            <div><strong>Status:</strong> ${collab.status || 'Unknown'}</div>
-          </div>
-        `;
-      });
-      collaboratorList.innerHTML = html;
+// Function to subscribe to collaborators for the current selected table
+function subscribeCollaborators(tableId) {
+  if (collaboratorsUnsubscribe) {
+    collaboratorsUnsubscribe(); // unsubscribe previous listener
+    collaboratorsUnsubscribe = null;
+  }
+  if (!tableId) {
+    collaboratorsData = [];
+    displayCollaborators();
+    return;
+  }
+  const q = query(
+    collection(db, 'tableAccess'),
+    where('tableId', '==', tableId),
+    where('status', '==', 'granted')
+  );
+  collaboratorsUnsubscribe = onSnapshot(q, async (snapshot) => {
+    const collabs = [];
+    for (const docSnap of snapshot.docs) {
+      const data = docSnap.data();
+      const email = await fetchUserEmail(data.userId);
+      collabs.push({ id: docSnap.id, ...data, email });
     }
+    collaboratorsData = collabs;
+    displayCollaborators();
+  });
+}
+
+// Function to display collaborators in the collaborator menu
+function displayCollaborators() {
+  const collaboratorList = document.getElementById('collaboratorList');
+  if (!collaboratorsData || collaboratorsData.length === 0) {
+    collaboratorList.innerHTML = '<div class="empty-collaborators" style="text-align: center; padding: 20px; color: #666; font-style: italic;">No collaborators for this table</div>';
+    return;
+  }
+  let html = '';
+  collaboratorsData.forEach(collab => {
+    html += `
+      <div style="padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px;">
+        <div><strong>Email:</strong> ${collab.email || 'Unknown'}</div>
+        <div><strong>Status:</strong> ${collab.status || 'Unknown'}</div>
+      </div>
+    `;
+  });
+  collaboratorList.innerHTML = html;
+}
 
     // Function to display notifications in the notification menu
     function displayNotifications() {
