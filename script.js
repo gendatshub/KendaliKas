@@ -104,9 +104,9 @@
       const snapshot = await getDocs(q);
       if (snapshot.empty) return;
       const batch = writeBatch(db);
-      snapshot.docs.forEach(doc => {
-        batch.update(doc.ref, { tableId: currentTable });
-      });
+        snapshot.docs.forEach(docSnap => {
+          batch.update(docSnap.ref, { tableId: currentTable });
+        });
       await batch.commit();
     }
 
@@ -172,8 +172,8 @@
         const q = query(collection(db, 'transactions'), where('userId', '==', currentUser.uid), where('tableId', '==', tableId));
         const snapshot = await getDocs(q);
         const batch = writeBatch(db);
-        snapshot.docs.forEach(doc => {
-          batch.update(doc.ref, { tableId: otherTable.id });
+        snapshot.docs.forEach(docSnap => {
+          batch.update(docSnap.ref, { tableId: otherTable.id });
         });
         await batch.commit();
         await deleteDoc(doc(db, 'tables', tableId));
@@ -200,8 +200,8 @@
       onSnapshot(q, async (snapshot) => {
         const pendingRequests = [];
 
-        for (const doc of snapshot.docs) {
-          const requestData = { id: doc.id, ...doc.data() };
+        for (const docSnap of snapshot.docs) {
+          const requestData = { id: docSnap.id, ...docSnap.data() };
 
           // Check if this user owns the table
           const tableRef = doc(db, 'tables', requestData.tableId);
@@ -647,8 +647,8 @@
       try {
         if (editingId) {
           // update
-          const refDoc = doc(db, 'transactions', editingId);
-          const payload = {
+        const refDoc = doc(db, 'transactions', editingId);
+        const payload = {
             nama, jenis, jumlah, tanggal, kategori,
             userId: currentUser.uid,
             uploader: currentUser.email || currentUser.displayName || 'Unknown',
