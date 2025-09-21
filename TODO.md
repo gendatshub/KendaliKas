@@ -1,12 +1,29 @@
-# Fix HTML/CSS/JS Separation Issues
+# Modal Button Styling Improvements
 
-## Issues to Fix:
-- [x] Remove HTML content from script.js causing syntax error
-- [x] Fix favicon.ico 404 error
-- [ ] Test application functionality
+## Plan Steps:
+- [x] Create TODO tracking file
+- [x] Update CSS with improved modal button styling
+- [ ] Update HTML to remove inline styles and add proper classes
+- [ ] Test modal functionality after styling changes
 
-## Steps:
-1. Clean up script.js - remove HTML content at the end
-2. Update index.html favicon reference
-3. Create favicon.ico file
-4. Test the application
+## Detailed Implementation:
+1. **CSS Improvements:**
+   - Create consistent button classes for all modal buttons
+   - Add proper hover, focus, and active states
+   - Improve spacing and visual hierarchy
+   - Add better color schemes and shadows
+   - Ensure responsive design
+
+2. **Specific Button Fixes:**
+   - **Collaborator Menu**: Style the notification button with better icon alignment
+   - **Table Menu**: Improve "Make Table" and "Request Access" button styling
+   - **Export-Import Menu**: Enhance export/import button design with better icons and layout
+
+3. **HTML Structure Improvements:**
+   - Remove inline styles from buttons
+   - Add proper classes for consistent styling
+   - Improve accessibility with better ARIA labels
+
+4. **Responsive Design:**
+   - Ensure buttons work well on mobile devices
+   - Proper touch targets for mobile users

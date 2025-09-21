@@ -94,9 +94,7 @@
                 style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
             </div>
 
-            <button type="submit" id="submitBtn"
-              style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s ease;">Save
-              Transaction</button>
+            <button type="submit" id="submitBtn" class="modal-button primary">Save Transaction</button>
           </form>
         </div>
       </div>
@@ -142,12 +140,10 @@
           <div id="tableList">
             <!-- Tables will be loaded here -->
           </div>
-          <button id="createTableBtn"
-            style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px;">Make
-            Table</button>
-          <button id="requestAccessBtn"
-            style="width: 100%; padding: 10px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;">Request
-            Access</button>
+          <div class="modal-button-container">
+            <button id="createTableBtn" class="modal-button primary">Make Table</button>
+            <button id="requestAccessBtn" class="modal-button secondary">Request Access</button>
+          </div>
         </div>
       </div>
 
@@ -162,8 +158,7 @@
               <input type="text" id="tableId" name="tableId" required
                 style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
             </div>
-            <button type="submit"
-              style="width: 100%; padding: 10px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Submit</button>
+            <button type="submit" class="modal-button secondary">Submit</button>
           </form>
         </div>
       </div>
@@ -176,8 +171,7 @@
           <div id="createTableForm">
             <input type="text" id="newTableName" placeholder="Table Name"
               style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
-            <button id="saveTableBtn"
-              style="width: 100%; padding: 10px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Save</button>
+            <button id="saveTableBtn" class="modal-button secondary">Save</button>
           </div>
         </div>
       </div>
@@ -188,9 +182,7 @@
           <button class="close-btn" onclick="closeDeleteTableModal()">×</button>
           <h1 id="deleteTableHeader">Delete Table</h1>
           <p>Unique Table ID: <span id="deleteTableId"></span></p>
-          <button id="confirmDeleteTableBtn"
-            style="width: 100%; padding: 10px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete
-            Table</button>
+          <button id="confirmDeleteTableBtn" class="modal-button danger">Delete Table</button>
         </div>
       </div>
 
@@ -313,8 +305,7 @@
             <h2 id="userName"></h2>
             <p id="userEmail"></p>
           </div>
-          <button id="logoutBtn"
-            style="width: 100%; padding: 12px; background-color: #f44336; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">Logout</button>
+          <button id="logoutBtn" class="modal-button danger">Logout</button>
         </div>
         <div id="loadingProfile" style="text-align: center;">Loading profile...</div>
       </div>
