@@ -134,11 +134,7 @@
           </span>
         </div>
         <div>
-          ${!isOwner ? `
-            <button onclick="event.stopPropagation(); showTableAccessInfo('${table.id}')" style="padding: 4px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 5px; display: flex; align-items: center; justify-content: center; font-size: 12px;" title="Access Info">
-              ℹ️
-            </button>
-          ` : ''}
+          
           <button onclick="event.stopPropagation(); openDeleteTableModal('${table.id}')" style="padding: 6px; background: #4a90e2; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 5px; display: flex; align-items: center; justify-content: center;" title="More Info">
             <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="currentColor">
               <circle cx="12" cy="7" r="2"/>
