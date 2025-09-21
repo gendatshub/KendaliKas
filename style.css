@@ -1249,6 +1249,15 @@ nav a span.icon {
     background-color: #138496;
 }
 
+/* Logout Button Container - Horizontal Flex Display */
+.logout-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    width: 100%;
+}
+
 /* Icon Button Base Styles */
 .icon-button {
     background: none;
