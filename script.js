@@ -222,7 +222,7 @@
       const notificationList = document.getElementById('notificationList');
 
       if (!notificationsData || notificationsData.length === 0) {
-        notificationList.innerHTML = '<p>No new notifications</p>';
+        notificationList.innerHTML = '<div class="empty-notifications" style="text-align: center; padding: 20px; color: #666; font-style: italic;">No new notifications</div>';
         return;
       }
 
