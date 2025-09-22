@@ -77,7 +77,13 @@
           const tableRef = doc(db, 'tables', access.tableId);
           const tableSnap = await getDoc(tableRef);
           if (tableSnap.exists()) {
-            const tableData = { id: access.tableId, ...tableSnap.data(), isOwner: false, accessId: access.id };
+            const tableData = {
+              id: access.tableId,
+              ...tableSnap.data(),
+              isOwner: false,
+              accessId: access.id,
+              role: access.role || 'viewer' // Store the role information
+            };
             tablesData.push(tableData);
           }
         }
@@ -117,7 +123,7 @@
       tablesData.forEach(table => {
         const isActive = table.id === currentTable;
         const isOwner = table.isOwner;
-        const accessStatus = isOwner ? 'Owner' : 'Access Granted';
+        const accessStatus = isOwner ? 'Owner' : (table.role ? table.role.charAt(0).toUpperCase() + table.role.slice(1) : 'Viewer');
 
         // Different styling for owned vs accessed tables
         const backgroundColor = isActive ? '#e3f2fd' : 'white';
@@ -273,11 +279,14 @@ function displayCollaborators() {
   }
   let html = '';
   collaboratorsData.forEach(collab => {
-    // Map status to role for dropdown default value
-    let role = 'Viewer';
-    if (collab.status && collab.status.toLowerCase() === 'granted') {
-      role = 'Editor';
+    // Use explicit role field, fallback to status-based role
+    let role = 'viewer';
+    if (collab.role) {
+      role = collab.role.toLowerCase();
+    } else if (collab.status && collab.status.toLowerCase() === 'granted') {
+      role = 'editor';
     }
+
     html += `
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px;">
         <div style="flex: 1;">
@@ -285,19 +294,45 @@ function displayCollaborators() {
             ${collab.email || 'Unknown'}
           </div>
           <div style="font-size: 12px; color: #666;">
-            Role: ${role}
+            Role: ${role.charAt(0).toUpperCase() + role.slice(1)}
           </div>
         </div>
         <div>
-          <select style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px;">
-            <option value="Editor" ${role === 'Editor' ? 'selected' : ''}>Editor</option>
-            <option value="Viewer" ${role === 'Viewer' ? 'selected' : ''}>Viewer</option>
+          <select onchange="changeCollaboratorRole('${collab.id}', this.value)"
+                  style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px;">
+            <option value="editor" ${role === 'editor' ? 'selected' : ''}>Editor</option>
+            <option value="viewer" ${role === 'viewer' ? 'selected' : ''}>Viewer</option>
           </select>
         </div>
       </div>
     `;
   });
   collaboratorList.innerHTML = html;
+}
+
+// Function to change collaborator role
+window.changeCollaboratorRole = async function(accessId, newRole) {
+  try {
+    const accessRef = doc(db, 'tableAccess', accessId);
+    await updateDoc(accessRef, {
+      role: newRole,
+      updatedAt: serverTimestamp()
+    });
+
+    // Update local data to reflect the change immediately
+    const collaborator = collaboratorsData.find(c => c.id === accessId);
+    if (collaborator) {
+      collaborator.role = newRole;
+    }
+
+    // Refresh the display
+    displayCollaborators();
+
+    alert('Collaborator role updated successfully!');
+  } catch (err) {
+    console.error('Error updating collaborator role:', err);
+    alert('Failed to update collaborator role. Please try again.');
+  }
 }
 
     // Function to display notifications in the notification menu
@@ -361,6 +396,7 @@ function displayCollaborators() {
         const requestRef = doc(db, 'tableAccess', requestId);
         await updateDoc(requestRef, {
           status: 'granted',
+          role: 'editor',
           grantedAt: serverTimestamp()
         });
 
@@ -368,12 +404,13 @@ function displayCollaborators() {
         await addDoc(collection(db, 'tableAccess'), {
           tableId: tableId,
           userId: userId,
+          role: 'editor',
           status: 'granted',
           grantedAt: serverTimestamp(),
           grantedBy: currentUser.uid
         });
 
-        alert('Access request accepted successfully!');
+        alert('Access request accepted successfully! User now has Editor role.');
       } catch (err) {
         console.error('Error accepting access request:', err);
         alert('Failed to accept access request. Please try again.');
