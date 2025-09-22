@@ -306,12 +306,15 @@ function displayCollaborators() {
   }
   let html = '';
   collaboratorsData.forEach(collab => {
-    // Use explicit role field, fallback to status-based role
-    let role = 'viewer';
-    if (collab.role) {
-      role = collab.role.toLowerCase();
-    } else if (collab.status && collab.status.toLowerCase() === 'granted') {
-      role = 'editor';
+    // Determine the role display
+    let roleDisplay = 'Editor'; // Default for collaborators
+    let roleColor = '#2196F3'; // Blue for Editor
+
+    // Check if this is the table owner (should show as Owner)
+    const currentTableData = tablesData.find(t => t.id === currentTable);
+    if (currentTableData && collab.userId === currentTableData.userId) {
+      roleDisplay = 'Owner';
+      roleColor = '#4CAF50'; // Green for Owner
     }
 
     html += `
@@ -320,16 +323,12 @@ function displayCollaborators() {
           <div style="font-weight: 600; color: #333; margin-bottom: 4px;">
             ${collab.email || 'Unknown'}
           </div>
-          <div style="font-size: 12px; color: #666;">
-            Role: ${role.charAt(0).toUpperCase() + role.slice(1)}
+          <div style="font-size: 12px; color: ${roleColor};">
+            Role: ${roleDisplay}
           </div>
         </div>
         <div>
-          <select onchange="changeCollaboratorRole('${collab.id}', this.value)"
-                  style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px;">
-            <option value="editor" ${role === 'editor' ? 'selected' : ''}>Editor</option>
-            <option value="viewer" ${role === 'viewer' ? 'selected' : ''}>Viewer</option>
-          </select>
+          <!-- Dropdown removed - all accepted users are automatically editors -->
         </div>
       </div>
     `;
