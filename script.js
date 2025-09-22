@@ -238,19 +238,7 @@
       });
     }
 
-async function fetchUserEmail(userId) {
-  try {
-    const userDoc = await getDoc(doc(db, 'users', userId));
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
-      return userData.email || 'Unknown Email';
-    }
-    return 'Unknown Email';
-  } catch (error) {
-    console.error('Error fetching user email:', error);
-    return 'Unknown Email';
-  }
-}
+
 
 // Function to subscribe to collaborators for the current selected table
 function subscribeCollaborators(tableId) {
@@ -284,7 +272,8 @@ function subscribeCollaborators(tableId) {
     for (const docSnap of snapshot.docs) {
       const data = docSnap.data();
       console.log('Collaborator data:', data);
-      const email = await fetchUserEmail(data.userId);
+      // Use requestedBy field which contains the email, or fallback to currentUser.email if available
+      const email = data.requestedBy || currentUser?.email || 'Unknown Email';
       collabs.push({ id: docSnap.id, ...data, email });
     }
 
