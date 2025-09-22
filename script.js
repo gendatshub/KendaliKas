@@ -263,19 +263,37 @@ function subscribeCollaborators(tableId) {
     displayCollaborators();
     return;
   }
+
+  // Get current table info to check if user is owner
+  const currentTableData = tablesData.find(t => t.id === tableId);
+  console.log('Current table data:', currentTableData);
+  console.log('Current table ID:', tableId);
+  console.log('Current user ID:', currentUser?.uid);
+
+  // Create query to get all collaborators for this table
   const q = query(
     collection(db, 'tableAccess'),
     where('tableId', '==', tableId),
     where('status', '==', 'granted')
   );
+
   collaboratorsUnsubscribe = onSnapshot(q, async (snapshot) => {
+    console.log('Collaborators snapshot received:', snapshot.docs.length, 'documents');
     const collabs = [];
+
     for (const docSnap of snapshot.docs) {
       const data = docSnap.data();
+      console.log('Collaborator data:', data);
       const email = await fetchUserEmail(data.userId);
       collabs.push({ id: docSnap.id, ...data, email });
     }
+
+    console.log('Final collaborators data:', collabs);
     collaboratorsData = collabs;
+    displayCollaborators();
+  }, (error) => {
+    console.error('Error subscribing to collaborators:', error);
+    collaboratorsData = [];
     displayCollaborators();
   });
 }
