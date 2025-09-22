@@ -129,7 +129,16 @@
         const backgroundColor = isActive ? '#e3f2fd' : 'white';
         const borderColor = isOwner ? '#4CAF50' : '#2196F3';
         const statusColor = isOwner ? '#4CAF50' : '#2196F3';
-        const statusIcon = isOwner ? '👑' : '🔓';
+
+        // Set status icon based on role
+        let statusIcon;
+        if (isOwner) {
+          statusIcon = '👑';
+        } else if (table.role === 'editor') {
+          statusIcon = '✏️';
+        } else {
+          statusIcon = '👁️';
+        }
 
         html += `
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px; background: ${backgroundColor}; ${!isActive ? 'cursor: pointer;' : ''}" ${!isActive ? `onclick="switchTable('${table.id}')"` : ''}>
