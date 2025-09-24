@@ -269,6 +269,23 @@ function subscribeCollaborators(tableId) {
     console.log('Collaborators snapshot received:', snapshot.docs.length, 'documents');
     const collabs = [];
 
+    // Add the table owner first
+    if (currentTableData && currentTableData.userId) {
+      // Get the owner's information from the table data
+      const ownerName = currentTableData.ownerName || currentTableData.userName || 'Table Owner';
+      const ownerEmail = currentTableData.ownerEmail || currentTableData.userEmail || 'owner@example.com';
+      collabs.push({
+        id: 'owner',
+        userId: currentTableData.userId,
+        email: ownerEmail,
+        name: ownerName,
+        role: 'owner',
+        status: 'granted',
+        isOwner: true
+      });
+    }
+
+    // Add other collaborators
     for (const docSnap of snapshot.docs) {
       const data = docSnap.data();
       console.log('Collaborator data:', data);
@@ -298,12 +315,28 @@ function displayCollaborators() {
     // Determine the role display
     let roleDisplay = 'Editor'; // Default for collaborators
     let roleColor = '#2196F3'; // Blue for Editor
+    let statusIcon = '✏️'; // Default icon for Editor
 
     // Check if this is the table owner (should show as Owner)
     const currentTableData = tablesData.find(t => t.id === currentTable);
-    if (currentTableData && collab.userId === currentTableData.userId) {
+    if (currentTableData && currentTableData.isOwner && collab.userId === currentUser.uid) {
+      // This is the current user and they own the table
       roleDisplay = 'Owner';
       roleColor = '#4CAF50'; // Green for Owner
+      statusIcon = '👑'; // Crown icon for Owner
+    } else if (currentTableData && collab.userId === currentTableData.userId) {
+      // This collaborator is the table owner
+      roleDisplay = 'Owner';
+      roleColor = '#4CAF50'; // Green for Owner
+      statusIcon = '👑'; // Crown icon for Owner
+    } else if (collab.role === 'editor') {
+      roleDisplay = 'Editor';
+      roleColor = '#2196F3'; // Blue for Editor
+      statusIcon = '✏️'; // Pencil icon for Editor
+    } else {
+      roleDisplay = 'Viewer';
+      roleColor = '#2196F3'; // Blue for Viewer
+      statusIcon = '👁️'; // Eye icon for Viewer
     }
 
     html += `
