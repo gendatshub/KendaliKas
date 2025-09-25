@@ -10,4 +10,3 @@
 ## Status
 - Started: [Date]
 - Completed: [Date]
-1
