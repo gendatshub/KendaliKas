@@ -6,7 +6,7 @@
       getAuth, onAuthStateChanged, signOut
     } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
     import {
-      getFirestore, collection, addDoc, onSnapshot, query, orderBy, where,
+      initializeFirestore, collection, addDoc, onSnapshot, query, orderBy, where,
       doc, updateDoc, deleteDoc, serverTimestamp, getDocs, writeBatch, getDoc
     } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
@@ -196,7 +196,7 @@
       }
     }
     const auth = getAuth(app);
-    const db = getFirestore(app);
+    const db = initializeFirestore(app, { experimentalForceLongPolling: true });
 
     let currentUser = null; // to store current user
     let currentTable = null; // to store current table id
