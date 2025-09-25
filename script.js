@@ -186,7 +186,7 @@
       if (!confirm(`Delete table "${table.name}"? Transactions will be moved to another table.`)) return;
       const otherTable = tablesData.find(t => t.id !== tableId);
       try {
-        const q = query(collection(db, 'transactions'), where('userId', '==', currentUser.uid), where('tableId', '==', tableId));
+        const q = query(collection(db, 'transactions'), where('tableId', '==', tableId));
         const snapshot = await getDocs(q);
         const batch = writeBatch(db);
         snapshot.docs.forEach(docSnap => {
@@ -731,9 +731,9 @@ window.changeCollaboratorRole = async function(accessId, newRole) {
     window.transactionData = transactionData; // make accessible globally
     let editingId = null;     // ketika sedang edit
 
-    // subscribe realtime ke koleksi "transactions" untuk user tertentu dan tabel tertentu
+    // subscribe realtime ke koleksi "transactions" untuk tabel tertentu (semua user dengan akses)
     function subscribeTransactions(userId, tableId) {
-      const q = query(collection(db, 'transactions'), where('userId', '==', userId), where('tableId', '==', tableId), orderBy('createdAt', 'desc'));
+      const q = query(collection(db, 'transactions'), where('tableId', '==', tableId), orderBy('createdAt', 'desc'));
       onSnapshot(q, (snapshot) => {
         transactionData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         window.transactionData = transactionData; // update global reference
