@@ -183,14 +183,13 @@
         return;
       }
       const table = tablesData.find(t => t.id === tableId);
-      if (!confirm(`Delete table "${table.name}"? Transactions will be moved to another table.`)) return;
-      const otherTable = tablesData.find(t => t.id !== tableId);
+      if (!confirm(`Delete table "${table.name}"? All transactions in this table will be permanently deleted.`)) return;
       try {
         const q = query(collection(db, 'transactions'), where('tableId', '==', tableId));
         const snapshot = await getDocs(q);
         const batch = writeBatch(db);
         snapshot.docs.forEach(docSnap => {
-          batch.update(docSnap.ref, { tableId: otherTable.id });
+          batch.delete(docSnap.ref);
         });
         await batch.commit();
         await deleteDoc(doc(db, 'tables', tableId));
