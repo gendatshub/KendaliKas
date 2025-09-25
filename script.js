@@ -1,4 +1,4 @@
- /* -----------------------
+/* -----------------------
        1) IMPORT FIREBASE SDK
        ----------------------- */
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
@@ -51,6 +51,67 @@
           displayTables();
           subscribeTransactions(userId, currentTable);
         }
+      });
+    }
+
+    // New function to call analytics API and update analytics section
+    async function updateAnalytics() {
+      if (!currentUser || !currentTable) return;
+      try {
+        // Get transactions for current user and table
+        const q = query(collection(db, 'transactions'), where('userId', '==', currentUser.uid), where('tableId', '==', currentTable));
+        const snapshot = await getDocs(q);
+        const transactions = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            tanggal: data.tanggal,
+            nama: data.nama,
+            jenis: data.jenis,
+            jumlah: data.jumlah,
+            kategori: data.kategori,
+            aktual: data.aktual || null
+          };
+        });
+
+        // Call backend analytics API
+        const response = await fetch('/analytics', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transactions })
+        });
+        const result = await response.json();
+
+        // Update analytics section
+        const analyticsSection = document.querySelector('#analytics > div');
+        if (!analyticsSection) return;
+
+        analyticsSection.innerHTML = `
+          <h1>Analytics</h1>
+          <img src="data:image/png;base64,${result.plot}" alt="Scatter Plot" style="max-width: 100%; height: auto;"/>
+          <div>${result.table}</div>
+          <pre style="white-space: pre-wrap; background: #f0f0f0; padding: 10px; border-radius: 5px;">${result.evaluation}</pre>
+          <p><strong>Saldo terakhir:</strong> Rp ${result.saldo_terakhir.toLocaleString('id-ID')}</p>
+        `;
+      } catch (err) {
+        console.error('Failed to update analytics:', err);
+      }
+    }
+
+    // Call updateAnalytics when transactions or tables change
+    function subscribeTransactions(userId, tableId) {
+      const q = query(collection(db, 'transactions'), where('userId', '==', userId), where('tableId', '==', tableId), orderBy('createdAt', 'desc'));
+      onSnapshot(q, (snapshot) => {
+        transactionData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        window.transactionData = transactionData; // update global reference
+        displayTransactions();
+        updateSummary();
+        updateAnalytics(); // update analytics on transaction change
+        const table = tablesData.find(t => t.id === tableId);
+        if (table) {
+          document.getElementById('dataTransaksiHeader').textContent = `Transaction Data - ${table.name}`;
+        }
+      }, (err) => {
+        console.error("Error onSnapshot:", err);
       });
     }
 
