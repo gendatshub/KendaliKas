@@ -50,6 +50,7 @@
           await migrateTransactions(userId);
           displayTables();
           subscribeTransactions(userId, currentTable);
+          subscribeCollaborators(currentTable);
         }
       });
     }
