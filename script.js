@@ -1043,22 +1043,43 @@ document.getElementById('confirmDeleteTableBtn').addEventListener('click', async
 });
 
 async function discardTableAccess(tableId) {
-  // Find the access document for current user and tableId
-  const q = query(collection(db, 'tableAccess'),
-    where('userId', '==', currentUser.uid),
-    where('tableId', '==', tableId),
-    where('status', '==', 'granted')
-  );
-  const snapshot = await getDocs(q);
-  if (snapshot.empty) {
-    throw new Error('No access record found.');
+  const table = tablesData.find(t => t.id === tableId);
+  if (table && table.accessId) {
+    // Update the specific access document using accessId
+    const accessRef = doc(db, 'tableAccess', table.accessId);
+    await updateDoc(accessRef, { status: 'discarded', discardedAt: serverTimestamp() });
+  } else {
+    // Fallback to query if accessId not available
+    const q = query(collection(db, 'tableAccess'),
+      where('userId', '==', currentUser.uid),
+      where('tableId', '==', tableId),
+      where('status', '==', 'granted')
+    );
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) {
+      throw new Error('No access record found.');
+    }
+    const batch = writeBatch(db);
+    snapshot.docs.forEach(docSnap => {
+      batch.update(docSnap.ref, { status: 'discarded', discardedAt: serverTimestamp() });
+    });
+    await batch.commit();
   }
-  // Update the status to 'discarded' or delete the access document
-  const batch = writeBatch(db);
-  snapshot.docs.forEach(docSnap => {
-    batch.update(docSnap.ref, { status: 'discarded', discardedAt: serverTimestamp() });
-  });
-  await batch.commit();
+
+  // Remove the table from local tablesData
+  tablesData = tablesData.filter(t => t.id !== tableId);
+
+  // If the discarded table was the current table, switch to another table
+  if (currentTable === tableId) {
+    currentTable = tablesData.length > 0 ? tablesData[0].id : null;
+    if (currentTable) {
+      subscribeTransactions(currentUser.uid, currentTable);
+      subscribeCollaborators(currentTable);
+    }
+  }
+
+  // Update the display
+  displayTables();
 }
 
     // Export to Excel
