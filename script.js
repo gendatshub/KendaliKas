@@ -77,14 +77,17 @@
           const tableRef = doc(db, 'tables', access.tableId);
           const tableSnap = await getDoc(tableRef);
           if (tableSnap.exists()) {
-            const tableData = {
-              id: access.tableId,
-              ...tableSnap.data(),
-              isOwner: false,
-              accessId: access.id,
-              role: access.role || 'viewer' // Store the role information
-            };
-            tablesData.push(tableData);
+            // Check if table is already in tablesData to avoid duplicates
+            if (!tablesData.find(t => t.id === access.tableId)) {
+              const tableData = {
+                id: access.tableId,
+                ...tableSnap.data(),
+                isOwner: false,
+                accessId: access.id,
+                role: access.role || 'viewer' // Store the role information
+              };
+              tablesData.push(tableData);
+            }
           }
         }
       } catch (err) {
@@ -290,9 +293,14 @@ function subscribeCollaborators(tableId) {
     for (const docSnap of snapshot.docs) {
       const data = docSnap.data();
       console.log('Collaborator data:', data);
-      // Use requestedBy field which contains the email, or fallback to currentUser.email if available
-      const email = data.requestedBy || currentUser?.email || 'Unknown Email';
-      collabs.push({ id: docSnap.id, ...data, email });
+      // Skip if this is the owner
+      if (data.userId === currentTableData.userId) continue;
+      // Check if collaborator is already in the list to avoid duplicates
+      if (!collabs.find(c => c.userId === data.userId)) {
+        // Use requestedBy field which contains the email, or fallback to currentUser.email if available
+        const email = data.requestedBy || currentUser?.email || 'Unknown Email';
+        collabs.push({ id: docSnap.id, ...data, email });
+      }
     }
 
     console.log('Final collaborators data:', collabs);
@@ -447,16 +455,6 @@ window.changeCollaboratorRole = async function(accessId, newRole) {
           status: 'granted',
           role: 'editor',
           grantedAt: serverTimestamp()
-        });
-
-        // Add the table to the user's accessible tables
-        await addDoc(collection(db, 'tableAccess'), {
-          tableId: tableId,
-          userId: userId,
-          role: 'editor',
-          status: 'granted',
-          grantedAt: serverTimestamp(),
-          grantedBy: currentUser.uid
         });
 
         alert('Access request accepted successfully! User now has Editor role.');

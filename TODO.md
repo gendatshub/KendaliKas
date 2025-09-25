@@ -1,11 +1,12 @@
-# TODO
+# TODO: Fix Duplicates in Collaborator, Table Menu, and Request Access
 
-- [x] Implement collaborator menu scoping to selected table in script.js
-  - Subscribe to collaborators for currentTable
-  - Display collaborators in collaborator menu modal
-  - Refresh subscription/display on table switch and menu open
+## Tasks
+- [x] Fix acceptAccessRequest: Remove duplicate addDoc
+- [x] Fix subscribeCollaborators: Skip owner in loop
+- [x] Fix getAccessibleTables: Deduplicate tables by tableId
+- [x] Optional: Deduplicate collaborators by userId
+- [x] Test the fixes by running the app
 
-- [ ] Verify no redundant or duplicate code in script.js after edits
-- [ ] Test collaborator menu shows correct collaborators for selected table
-- [ ] Test switching tables updates collaborator menu data correctly
-- [ ] Test notification menu and other features remain unaffected
+## Status
+- Started: [Date]
+- Completed: [Date]
