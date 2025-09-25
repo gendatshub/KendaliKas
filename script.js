@@ -97,6 +97,7 @@
         const docRef = await addDoc(collection(db, 'tables'), {
           userId,
           name: 'Default',
+          ownerEmail: currentUser.email,
           createdAt: serverTimestamp()
         });
         currentTable = docRef.id;
@@ -979,6 +980,7 @@ window.changeCollaboratorRole = async function(accessId, newRole) {
         await addDoc(collection(db, 'tables'), {
           userId: currentUser.uid,
           name,
+          ownerEmail: currentUser.email,
           createdAt: serverTimestamp()
         });
         closeCreateTableModal();
