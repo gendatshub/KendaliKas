@@ -18,7 +18,7 @@
 - [x] Edit script.js: Add computeAnomalies function
 - [x] Edit script.js: Add renderAnalytics function
 - [x] Edit script.js: Integrate renderAnalytics into nav click handler
-- [ ] Test the integration by navigating to Analytics section
+- [x] Test the integration by navigating to Analytics section
 
 ## Status
 - Started: [Date]

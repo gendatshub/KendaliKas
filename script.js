@@ -842,10 +842,10 @@ window.changeCollaboratorRole = async function(accessId, newRole) {
 
       const ctx = canvas.getContext('2d');
 
-      // Prepare data for scatter: x = date (as Date object), y = jumlah
+      // Prepare data for scatter: x = date (as Date object), y = signed amount (positive for income, negative for expense)
       const scatterData = anomalies.map(d => ({
         x: new Date(d.tanggal),
-        y: d.jumlah
+        y: d.jenis === 'pengeluaran' ? -d.jumlah : d.jumlah
       }));
 
       // Colors: red for anomalies, blue for normal
@@ -885,10 +885,10 @@ window.changeCollaboratorRole = async function(accessId, newRole) {
               }
             },
             y: {
-              beginAtZero: true,
+              beginAtZero: false,
               title: {
                 display: true,
-                text: 'Financial Amount (Rp)'
+                text: 'Amount (Rp)'
               }
             }
           },
@@ -900,7 +900,8 @@ window.changeCollaboratorRole = async function(accessId, newRole) {
               callbacks: {
                 label: function(context) {
                   const transaction = anomalies[context.dataIndex];
-                  return `${transaction.nama}: Rp ${transaction.jumlah.toLocaleString('id-ID')} (${transaction.jenis})`;
+                  const signedAmount = transaction.jenis === 'pengeluaran' ? -transaction.jumlah : transaction.jumlah;
+                  return `${transaction.nama}: Rp ${signedAmount.toLocaleString('id-ID')} (${transaction.jenis})`;
                 }
               }
             }
@@ -913,6 +914,33 @@ window.changeCollaboratorRole = async function(accessId, newRole) {
       const anomalyInfo = document.getElementById('anomalyInfo');
       if (anomalyInfo) {
         anomalyInfo.innerHTML = `<strong>Detected ${anomalyCount} anomalous transactions.</strong> Anomalies (outliers in amount) are marked in red.`;
+      }
+
+      // Display list of anomalous transactions
+      const anomalousTransactions = anomalies.filter(d => d.anomali === 1);
+      const anomalyList = document.getElementById('anomalyList');
+      if (anomalyList) {
+        if (anomalousTransactions.length === 0) {
+          anomalyList.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">No anomalous transactions detected.</p>';
+        } else {
+          let listHtml = '<h3 style="margin-top: 0; color: #333;">Anomalous Transactions:</h3><ul style="list-style: none; padding: 0;">';
+          anomalousTransactions.forEach(transaction => {
+            const formattedDate = transaction.tanggal ? new Date(transaction.tanggal).toLocaleDateString('id-ID') : '-';
+            const formattedAmount = formatCurrency(transaction.jumlah);
+            const typeColor = transaction.jenis === 'pemasukan' ? '#4CAF50' : '#f44336';
+            listHtml += `
+              <li style="padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 4px; background: #fff;">
+                <div style="font-weight: 600; color: #333;">${transaction.nama}</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #666;">
+                  <span>Date: ${formattedDate} | Category: ${transaction.kategori || 'Umum'} | Type: <span style="color: ${typeColor};">${transaction.jenis === 'pemasukan' ? 'Income' : 'Expense'}</span></span>
+                  <span style="font-weight: 600; color: ${typeColor};">${formattedAmount}</span>
+                </div>
+              </li>
+            `;
+          });
+          listHtml += '</ul>';
+          anomalyList.innerHTML = listHtml;
+        }
       }
     }
 
