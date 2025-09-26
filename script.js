@@ -842,10 +842,14 @@ window.changeCollaboratorRole = async function(accessId, newRole) {
 
       const ctx = canvas.getContext('2d');
 
-      // Prepare data
-      const labels = anomalies.map(d => d.tanggal);
-      const balances = anomalies.map(d => d.saldo);
-      const anomalousIndices = anomalies.map((d, i) => d.anomali ? i : null).filter(i => i !== null);
+      // Prepare data for scatter: x = date (as Date object), y = jumlah
+      const scatterData = anomalies.map(d => ({
+        x: new Date(d.tanggal),
+        y: d.jumlah
+      }));
+
+      // Colors: red for anomalies, blue for normal
+      const pointColors = anomalies.map(d => d.anomali ? 'red' : 'rgb(75, 192, 192)');
 
       // Destroy previous chart
       if (analyticsChart) {
@@ -853,35 +857,52 @@ window.changeCollaboratorRole = async function(accessId, newRole) {
       }
 
       analyticsChart = new Chart(ctx, {
-        type: 'line',
+        type: 'scatter',
         data: {
-          labels: labels,
           datasets: [{
-            label: 'Balance Over Time',
-            data: balances,
-            borderColor: 'rgb(75, 192, 192)',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            tension: 0.1
+            label: 'Transaction Amounts Over Time',
+            data: scatterData,
+            backgroundColor: pointColors,
+            borderColor: pointColors,
+            pointRadius: 6,
+            pointHoverRadius: 8
           }]
         },
         options: {
           responsive: true,
           scales: {
+            x: {
+              type: 'time',
+              time: {
+                unit: 'day',
+                displayFormats: {
+                  day: 'MMM dd'
+                }
+              },
+              title: {
+                display: true,
+                text: 'Time (Transactions Progressing Right)'
+              }
+            },
             y: {
-              beginAtZero: false
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Financial Amount (Rp)'
+              }
             }
           },
           plugins: {
-            annotation: {
-              annotations: anomalousIndices.map(idx => ({
-                type: 'point',
-                xValue: labels[idx],
-                yValue: balances[idx],
-                backgroundColor: 'red',
-                radius: 8,
-                borderColor: 'red',
-                borderWidth: 2
-              }))
+            legend: {
+              display: true
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const transaction = anomalies[context.dataIndex];
+                  return `${transaction.nama}: Rp ${transaction.jumlah.toLocaleString('id-ID')} (${transaction.jenis})`;
+                }
+              }
             }
           }
         }
@@ -891,7 +912,7 @@ window.changeCollaboratorRole = async function(accessId, newRole) {
       const anomalyCount = anomalies.filter(d => d.anomali === 1).length;
       const anomalyInfo = document.getElementById('anomalyInfo');
       if (anomalyInfo) {
-        anomalyInfo.textContent = `Detected ${anomalyCount} anomalous transactions.`;
+        anomalyInfo.innerHTML = `<strong>Detected ${anomalyCount} anomalous transactions.</strong> Anomalies (outliers in amount) are marked in red.`;
       }
     }
 
