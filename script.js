@@ -542,6 +542,8 @@ window.changeCollaboratorRole = async function(accessId, newRole) {
               fadeIn(targetSection);
               if (targetId === 'analytics') {
                 renderAnalytics();
+              } else if (targetId === 'dashboard') {
+                renderDashboard();
               }
             });
           }
@@ -750,6 +752,10 @@ window.changeCollaboratorRole = async function(accessId, newRole) {
         if (table) {
           document.getElementById('dataTransaksiHeader').textContent = `Transaction Data - ${table.name}`;
         }
+        // Render dashboard if it's the active section
+        if (document.querySelector('section.active')?.id === 'dashboard') {
+          renderDashboard();
+        }
       }, (err) => {
         console.error("Error onSnapshot:", err);
       });
@@ -829,6 +835,8 @@ window.changeCollaboratorRole = async function(accessId, newRole) {
     }
 
     let analyticsChart = null;
+    let incomeChart = null;
+    let expenseChart = null;
 
     function renderAnalytics() {
       const canvas = document.getElementById('analyticsChart');
@@ -942,6 +950,117 @@ window.changeCollaboratorRole = async function(accessId, newRole) {
           anomalyList.innerHTML = listHtml;
         }
       }
+    }
+
+    function renderDashboard() {
+      const incomeCanvas = document.getElementById('incomePieChart');
+      const expenseCanvas = document.getElementById('expensePieChart');
+      if (!incomeCanvas || !expenseCanvas) return;
+
+      // Destroy previous charts
+      if (incomeChart) {
+        incomeChart.destroy();
+      }
+      if (expenseChart) {
+        expenseChart.destroy();
+      }
+
+      // Filter income and expense
+      const incomes = transactionData.filter(t => t.jenis === 'pemasukan');
+      const expenses = transactionData.filter(t => t.jenis === 'pengeluaran');
+
+      // Group by kategori and sum jumlah
+      const groupByCategory = (data) => {
+        const grouped = {};
+        data.forEach(t => {
+          const cat = t.kategori || 'Umum';
+          grouped[cat] = (grouped[cat] || 0) + t.jumlah;
+        });
+        return grouped;
+      };
+
+      const incomeGrouped = groupByCategory(incomes);
+      const expenseGrouped = groupByCategory(expenses);
+
+      // Prepare data for pie charts
+      const incomeLabels = Object.keys(incomeGrouped);
+      const incomeData = Object.values(incomeGrouped);
+      const expenseLabels = Object.keys(expenseGrouped);
+      const expenseData = Object.values(expenseGrouped);
+
+      // Generate colors
+      const generateColors = (length) => {
+        const colors = [];
+        for (let i = 0; i < length; i++) {
+          colors.push(`hsl(${(i * 360) / length}, 70%, 50%)`);
+        }
+        return colors;
+      };
+
+      const incomeColors = generateColors(incomeLabels.length);
+      const expenseColors = generateColors(expenseLabels.length);
+
+      // Income Pie Chart
+      const incomeCtx = incomeCanvas.getContext('2d');
+      incomeChart = new Chart(incomeCtx, {
+        type: 'pie',
+        data: {
+          labels: incomeLabels,
+          datasets: [{
+            data: incomeData,
+            backgroundColor: incomeColors,
+            borderColor: incomeColors,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const value = context.parsed;
+                  return `${context.label}: ${formatCurrency(value)}`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Expense Pie Chart
+      const expenseCtx = expenseCanvas.getContext('2d');
+      expenseChart = new Chart(expenseCtx, {
+        type: 'pie',
+        data: {
+          labels: expenseLabels,
+          datasets: [{
+            data: expenseData,
+            backgroundColor: expenseColors,
+            borderColor: expenseColors,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const value = context.parsed;
+                  return `${context.label}: ${formatCurrency(value)}`;
+                }
+              }
+            }
+          }
+        }
+      });
     }
 
     /* -----------------------
