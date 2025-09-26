@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KendaliKas</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/x-icon" href="data:image/x-icon;,">
 </head>
@@ -46,8 +47,8 @@
     <section id="analytics">
       <div style="padding: 20px;">
         <h1>Analytics</h1>
-        <p>Your financial data analysis will be displayed here.</p>
-        <!-- Placeholder for charts or additional analytics -->
+        <canvas id="analyticsChart" width="800" height="400"></canvas>
+        <div id="anomalyInfo" style="margin-top:20px;"></div>
       </div>
     </section>
 

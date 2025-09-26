@@ -540,11 +540,17 @@ window.changeCollaboratorRole = async function(accessId, newRole) {
                 sec.style.pointerEvents = 'none';
               });
               fadeIn(targetSection);
+              if (targetId === 'analytics') {
+                renderAnalytics();
+              }
             });
           }
         } else if (!currentActive) {
           link.classList.add('active');
           fadeIn(targetSection);
+          if (targetId === 'analytics') {
+            renderAnalytics();
+          }
         }
         nav.classList.remove('show');
       });
@@ -797,6 +803,96 @@ window.changeCollaboratorRole = async function(accessId, newRole) {
     function formatInputValue(num) {
       if (num == null) return '';
       return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function computeAnomalies(data) {
+      if (!data || data.length === 0) return [];
+      // Sort by date
+      const sorted = [...data].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+      let saldo = 1000000; // initial balance
+      const augmented = sorted.map(item => {
+        if (item.jenis === 'pemasukan') {
+          saldo += item.jumlah;
+        } else {
+          saldo -= item.jumlah;
+        }
+        return { ...item, saldo };
+      });
+      // Compute IQR on jumlah
+      const amounts = augmented.map(d => d.jumlah).sort((a, b) => a - b);
+      const q1 = amounts[Math.floor(amounts.length * 0.25)];
+      const q3 = amounts[Math.floor(amounts.length * 0.75)];
+      const iqr = q3 - q1;
+      const lower = q1 - 1.5 * iqr;
+      const upper = q3 + 1.5 * iqr;
+      return augmented.map(d => ({ ...d, anomali: d.jumlah < lower || d.jumlah > upper ? 1 : 0 }));
+    }
+
+    let analyticsChart = null;
+
+    function renderAnalytics() {
+      const canvas = document.getElementById('analyticsChart');
+      if (!canvas) return;
+
+      const anomalies = computeAnomalies(transactionData);
+      if (anomalies.length === 0) {
+        canvas.style.display = 'none';
+        return;
+      }
+
+      const ctx = canvas.getContext('2d');
+
+      // Prepare data
+      const labels = anomalies.map(d => d.tanggal);
+      const balances = anomalies.map(d => d.saldo);
+      const anomalousIndices = anomalies.map((d, i) => d.anomali ? i : null).filter(i => i !== null);
+
+      // Destroy previous chart
+      if (analyticsChart) {
+        analyticsChart.destroy();
+      }
+
+      analyticsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Balance Over Time',
+            data: balances,
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: false
+            }
+          },
+          plugins: {
+            annotation: {
+              annotations: anomalousIndices.map(idx => ({
+                type: 'point',
+                xValue: labels[idx],
+                yValue: balances[idx],
+                backgroundColor: 'red',
+                radius: 8,
+                borderColor: 'red',
+                borderWidth: 2
+              }))
+            }
+          }
+        }
+      });
+
+      // Show anomaly count
+      const anomalyCount = anomalies.filter(d => d.anomali === 1).length;
+      const anomalyInfo = document.getElementById('anomalyInfo');
+      if (anomalyInfo) {
+        anomalyInfo.textContent = `Detected ${anomalyCount} anomalous transactions.`;
+      }
     }
 
     /* -----------------------

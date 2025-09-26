@@ -10,3 +10,16 @@
 ## Status
 - Started: [Date]
 - Completed: [Date]
+
+# TODO: Integrate Anomaly Detection in Analytics Section
+
+## Tasks
+- [x] Edit index.html: Add Chart.js CDN and elements to #analytics
+- [x] Edit script.js: Add computeAnomalies function
+- [x] Edit script.js: Add renderAnalytics function
+- [x] Edit script.js: Integrate renderAnalytics into nav click handler
+- [ ] Test the integration by navigating to Analytics section
+
+## Status
+- Started: [Date]
+- Completed: [Date]
