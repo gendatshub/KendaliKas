@@ -1182,6 +1182,24 @@ nav a span.icon {
     color: #2196F3;
 }
 
+.pie-charts {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.pie-charts .summary-card {
+    width: 45%;
+    min-width: 300px;
+}
+
+@media (max-width: 650px) {
+    .pie-charts .summary-card + .summary-card {
+        margin-top: 20px;
+    }
+}
+
 .action-buttons {
     display: flex;
     gap: 8px;
